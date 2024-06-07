@@ -10,10 +10,6 @@ import (
 
 type JetEngine struct{}
 
-func NewJetEngine() *JetEngine {
-	return &JetEngine{}
-}
-
 func (e *JetEngine) Render(file string, w io.Writer, data map[string]any) error {
 	renderer := jet.NewSet(jet.NewOSFileSystemLoader("./"))
 	tpl, err := renderer.GetTemplate(file)

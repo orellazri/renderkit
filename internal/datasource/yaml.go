@@ -8,10 +8,6 @@ import (
 
 type YamlDatasource struct{}
 
-func NewYamlDatasource() *YamlDatasource {
-	return &YamlDatasource{}
-}
-
 func (ds *YamlDatasource) Load(r io.Reader) (map[string]any, error) {
 	data := make(map[string]any)
 	decoder := yaml.NewDecoder(r)
