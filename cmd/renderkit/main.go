@@ -21,7 +21,7 @@ func main() {
 
 	app := &cli.App{
 		Name:  "renderkit",
-		Usage: "A swiss army knife CLI for rendering templates",
+		Usage: "A swiss army knife CLI tool for rendering templates",
 		Flags: []cli.Flag{
 			&cli.PathFlag{
 				Name:     "input",
