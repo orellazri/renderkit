@@ -6,12 +6,11 @@ import (
 	"strings"
 
 	"github.com/orellazri/renderkit/internal/datasource"
-	"github.com/urfave/cli/v2"
 )
 
-func (a *App) parseDatasourceUrls(cCtx *cli.Context) ([]*url.URL, error) {
-	datasourceUrls := make([]*url.URL, len(cCtx.StringSlice("datasource")))
-	for i, ds := range cCtx.StringSlice("datasource") {
+func (a *App) parseDatasourceUrls(datasources []string) ([]*url.URL, error) {
+	datasourceUrls := make([]*url.URL, len(datasources))
+	for i, ds := range datasources {
 		url, err := url.Parse(ds)
 		if err != nil {
 			return nil, fmt.Errorf("invalid url %s: %s", ds, err)

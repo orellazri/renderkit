@@ -40,12 +40,12 @@ func (a *App) validateFlags(cCtx *cli.Context) error {
 	return nil
 }
 
-func (a *App) setMode(cCtx *cli.Context) error {
-	if len(cCtx.StringSlice("input")) == 1 {
+func (a *App) setMode(input []string, inputDir string) error {
+	if len(input) == 1 {
 		a.mode = ModeFileToFile
-	} else if len(cCtx.StringSlice("input")) > 1 {
+	} else if len(input) > 1 {
 		a.mode = ModeFilesToDir
-	} else if len(cCtx.String("input-dir")) > 0 {
+	} else if len(inputDir) > 0 {
 		a.mode = ModeDirToDir
 	} else {
 		return errors.New("unsupported mode")
@@ -54,10 +54,10 @@ func (a *App) setMode(cCtx *cli.Context) error {
 	return nil
 }
 
-func (a *App) setEngine(cCtx *cli.Context) error {
-	eng, ok := engine.EnginesMap[cCtx.String("engine")]
+func (a *App) setEngine(engineStr string) error {
+	eng, ok := engine.EnginesMap[engineStr]
 	if !ok {
-		return fmt.Errorf("engine %s not found", cCtx.String("engine"))
+		return fmt.Errorf("engine %s not found", engineStr)
 	}
 	a.engine = eng
 

@@ -101,15 +101,15 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("validate flags: %s", err)
 	}
 
-	if err := a.setMode(cCtx); err != nil {
+	if err := a.setMode(cCtx.StringSlice("input"), cCtx.String("input-dir")); err != nil {
 		return fmt.Errorf("set mode: %s", err)
 	}
 
-	if err := a.setEngine(cCtx); err != nil {
+	if err := a.setEngine(cCtx.String("engine")); err != nil {
 		return fmt.Errorf("set engine: %s", err)
 	}
 
-	datasourceUrls, err := a.parseDatasourceUrls(cCtx)
+	datasourceUrls, err := a.parseDatasourceUrls(cCtx.StringSlice("datasource"))
 	if err != nil {
 		return fmt.Errorf("parse datasource URLs: %s", err)
 	}
@@ -119,7 +119,13 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("load datasources: %s", err)
 	}
 
-	if err := a.render(cCtx, data); err != nil {
+	if err := a.render(
+		cCtx.StringSlice("input"),
+		cCtx.String("output"),
+		cCtx.String("input-dir"),
+		cCtx.String("output-dir"),
+		data,
+	); err != nil {
 		return fmt.Errorf("render: %s", err)
 	}
 

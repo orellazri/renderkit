@@ -4,34 +4,32 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/urfave/cli/v2"
 )
 
-func (a *App) render(cCtx *cli.Context, data map[string]any) error {
+func (a *App) render(input []string, output, inputDir, outputDir string, data map[string]any) error {
 	switch a.mode {
 	case ModeFileToFile:
-		return a.renderFileToFile(cCtx, data)
+		return a.renderFileToFile(input, output, data)
 	case ModeFilesToDir:
-		return a.renderFilesToDir(cCtx, data)
+		return a.renderFilesToDir(input, outputDir, data)
 	case ModeDirToDir:
-		return a.renderDirToDir(cCtx, data)
+		return a.renderDirToDir(inputDir, outputDir, data)
 	}
 
 	return nil
 }
 
-func (a *App) renderFileToFile(cCtx *cli.Context, data map[string]any) error {
-	return a.renderFile(cCtx.StringSlice("input")[0], cCtx.String("output"), data)
+func (a *App) renderFileToFile(input []string, output string, data map[string]any) error {
+	return a.renderFile(input[0], output, data)
 }
 
-func (a *App) renderFilesToDir(cCtx *cli.Context, data map[string]any) error {
-	if err := os.MkdirAll(cCtx.String("output-dir"), os.ModePerm); err != nil {
-		return fmt.Errorf("create output directory %s: %s", cCtx.String("output-dir"), err)
+func (a *App) renderFilesToDir(input []string, outputDir string, data map[string]any) error {
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return fmt.Errorf("create output directory %s: %s", outputDir, err)
 	}
 
-	for _, inFilename := range cCtx.StringSlice("input") {
-		outFilename := filepath.Join(cCtx.String("output-dir"), filepath.Base(inFilename))
+	for _, inFilename := range input {
+		outFilename := filepath.Join(outputDir, filepath.Base(inFilename))
 		if err := a.renderFile(inFilename, outFilename, data); err != nil {
 			return fmt.Errorf("render file: %s", err)
 		}
@@ -40,19 +38,19 @@ func (a *App) renderFilesToDir(cCtx *cli.Context, data map[string]any) error {
 	return nil
 }
 
-func (a *App) renderDirToDir(cCtx *cli.Context, data map[string]any) error {
-	if err := os.MkdirAll(cCtx.String("output-dir"), os.ModePerm); err != nil {
-		return fmt.Errorf("create output directory %s: %s", cCtx.String("output-dir"), err)
+func (a *App) renderDirToDir(inputDir, outputDir string, data map[string]any) error {
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return fmt.Errorf("create output directory %s: %s", outputDir, err)
 	}
 
-	entries, err := os.ReadDir(cCtx.String("input-dir"))
+	entries, err := os.ReadDir(inputDir)
 	if err != nil {
-		return fmt.Errorf("read input directory %s: %s", cCtx.String("input-dir"), err)
+		return fmt.Errorf("read input directory %s: %s", inputDir, err)
 	}
 
 	for _, entry := range entries {
-		inFilename := filepath.Join(cCtx.String("input-dir"), entry.Name())
-		outFilename := filepath.Join(cCtx.String("output-dir"), entry.Name())
+		inFilename := filepath.Join(inputDir, entry.Name())
+		outFilename := filepath.Join(outputDir, entry.Name())
 		if err := a.renderFile(inFilename, outFilename, data); err != nil {
 			return fmt.Errorf("render file: %s", err)
 		}
