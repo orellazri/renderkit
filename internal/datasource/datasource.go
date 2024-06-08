@@ -12,7 +12,7 @@ type Datasource interface {
 
 func CreateDatasourceFromURL(url *url.URL) (Datasource, error) {
 	switch url.Scheme {
-	case "":
+	case "", "file":
 		switch filepath.Ext(url.Path) {
 		case ".yaml", ".yml":
 			return NewYamlDatasource(url.Path), nil
