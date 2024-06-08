@@ -2,11 +2,9 @@ package app
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"strings"
 
-	"github.com/orellazri/renderkit/internal/datasource"
 	"github.com/orellazri/renderkit/internal/engine"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
@@ -65,74 +63,28 @@ func NewApp() *cli.App {
 }
 
 func run(cCtx *cli.Context) error {
-	// Validate flags
 	if err := validateFlags(cCtx); err != nil {
 		return fmt.Errorf("validate flags: %s", err)
 	}
 
-	// Parse datasource URLs
-	datasourceUrls := make([]*url.URL, len(cCtx.StringSlice("datasource")))
-	for i, ds := range cCtx.StringSlice("datasource") {
-		url, err := url.Parse(ds)
-		if err != nil {
-			return fmt.Errorf("parse datasource %s: %s", ds, err)
-		}
-		datasourceUrls[i] = url
+	datasourceUrls, err := parseDatasourceUrls(cCtx)
+	if err != nil {
+		return fmt.Errorf("parse datasource URLs: %s", err)
 	}
 
-	// Create datasources
-	data := make(map[string]any)
-	for _, url := range datasourceUrls {
-		ds, err := datasource.CreateDatasourceFromURL(url)
-		if err != nil {
-			return fmt.Errorf("create datasource %s: %s", url, err)
-		}
-
-		dsData, err := ds.Load()
-		if err != nil {
-			return fmt.Errorf("load datasource %s: %s", url, err)
-		}
-
-		// Merge with data dictionary
-		for k, v := range dsData {
-			data[k] = v
-		}
+	data, err := loadDatasources(datasourceUrls)
+	if err != nil {
+		return fmt.Errorf("create datasources: %s", err)
 	}
 
-	// Create output file
 	outFile, err := os.Create(cCtx.String("output"))
 	if err != nil {
-		return fmt.Errorf("create file %s: %s", cCtx.String("output"), err)
+		return fmt.Errorf("create output file %s: %s", cCtx.String("output"), err)
 	}
 	defer outFile.Close()
 
-	// Render the template
-	eng, ok := engine.EnginesMap[cCtx.String("engine")]
-	if !ok {
-		return fmt.Errorf("engine %s not found", cCtx.String("engine"))
-	}
-	if err := eng.Render(cCtx.String("input"), outFile, data); err != nil {
-		return fmt.Errorf("render: %s", err)
-	}
-
-	return nil
-}
-
-func validateFlags(cCtx *cli.Context) error {
-	if len(cCtx.String("input")) == 0 {
-		return fmt.Errorf("input file is required")
-	}
-
-	if len(cCtx.StringSlice("datasource")) == 0 {
-		return fmt.Errorf("datasource is required")
-	}
-
-	if len(cCtx.String("engine")) == 0 {
-		return fmt.Errorf("engine is required")
-	}
-
-	if len(cCtx.String("output")) == 0 {
-		return fmt.Errorf("output file is required")
+	if err := renderTemplate(cCtx, outFile, data); err != nil {
+		return fmt.Errorf("render template: %s", err)
 	}
 
 	return nil
