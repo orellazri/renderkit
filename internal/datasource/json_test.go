@@ -7,20 +7,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestYamlLoad(t *testing.T) {
+func TestJsonLoad(t *testing.T) {
 	dir := t.TempDir()
-	file, err := os.CreateTemp(dir, "ds.yaml")
+	file, err := os.CreateTemp(dir, "ds.json")
 	require.NoError(t, err)
 
 	_, err = file.WriteString(`
-key1: value1
-key2: 5`)
+{
+	"key1": "value1",
+	"key2": 5
+}`)
 	require.NoError(t, err)
-	ds := NewYamlDatasource(file.Name())
+	ds := NewJsonDatasource(file.Name())
 
 	expectedData := map[string]any{
 		"key1": "value1",
-		"key2": 5,
+		"key2": float64(5),
 	}
 	data, err := ds.Load()
 	require.NoError(t, err)
