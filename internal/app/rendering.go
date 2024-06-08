@@ -22,17 +22,7 @@ func (a *App) render(cCtx *cli.Context, data map[string]any) error {
 }
 
 func (a *App) renderFileToFile(cCtx *cli.Context, data map[string]any) error {
-	outFile, err := os.Create(cCtx.String("output"))
-	if err != nil {
-		return fmt.Errorf("create output file %s: %s", cCtx.String("output"), err)
-	}
-	defer outFile.Close()
-
-	if err := a.renderTemplate(cCtx.StringSlice("input")[0], outFile, data); err != nil {
-		return fmt.Errorf("render template: %s", err)
-	}
-
-	return nil
+	return a.renderFile(cCtx.StringSlice("input")[0], cCtx.String("output"), data)
 }
 
 func (a *App) renderFilesToDir(cCtx *cli.Context, data map[string]any) error {
@@ -42,13 +32,8 @@ func (a *App) renderFilesToDir(cCtx *cli.Context, data map[string]any) error {
 
 	for _, inFilename := range cCtx.StringSlice("input") {
 		outFilename := filepath.Join(cCtx.String("output-dir"), filepath.Base(inFilename))
-		outFile, err := os.Create(outFilename)
-		if err != nil {
-			return fmt.Errorf("create output file %s: %s", outFilename, err)
-		}
-		defer outFile.Close()
-		if err := a.renderTemplate(inFilename, outFile, data); err != nil {
-			return fmt.Errorf("render template: %s", err)
+		if err := a.renderFile(inFilename, outFilename, data); err != nil {
+			return fmt.Errorf("render file: %s", err)
 		}
 	}
 
@@ -65,24 +50,26 @@ func (a *App) renderDirToDir(cCtx *cli.Context, data map[string]any) error {
 		return fmt.Errorf("read input directory %s: %s", cCtx.String("input-dir"), err)
 	}
 
-	for _, inFilename := range entries {
-		outFilename := filepath.Join(cCtx.String("output-dir"), filepath.Base(inFilename.Name()))
-		outFile, err := os.Create(outFilename)
-		if err != nil {
-			return fmt.Errorf("create output file %s: %s", outFilename, err)
-		}
-		defer outFile.Close()
-		if err := a.renderTemplate(filepath.Join(cCtx.String("input-dir"), inFilename.Name()), outFile, data); err != nil {
-			return fmt.Errorf("render template: %s", err)
+	for _, entry := range entries {
+		inFilename := filepath.Join(cCtx.String("input-dir"), entry.Name())
+		outFilename := filepath.Join(cCtx.String("output-dir"), entry.Name())
+		if err := a.renderFile(inFilename, outFilename, data); err != nil {
+			return fmt.Errorf("render file: %s", err)
 		}
 	}
 
 	return nil
 }
 
-func (a *App) renderTemplate(inFilename string, outFile *os.File, data map[string]any) error {
+func (a *App) renderFile(inFilename, outFilename string, data map[string]any) error {
+	outFile, err := os.Create(outFilename)
+	if err != nil {
+		return fmt.Errorf("create output file %s: %s", outFilename, err)
+	}
+	defer outFile.Close()
+
 	if err := a.engine.Render(inFilename, outFile, data); err != nil {
-		return fmt.Errorf("render: %s", err)
+		return fmt.Errorf("render template: %s", err)
 	}
 
 	return nil
