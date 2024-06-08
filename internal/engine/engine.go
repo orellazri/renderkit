@@ -7,5 +7,6 @@ type Engine interface {
 }
 
 var EnginesMap = map[string]Engine{
-	"jet": &JetEngine{},
+	"jet":   &JetEngine{},
+	"jinja": &JinjaEngine{},
 }
