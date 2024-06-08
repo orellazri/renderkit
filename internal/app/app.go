@@ -26,7 +26,7 @@ func NewApp() *cli.App {
 			Usage:   "Load configuration from YAML file",
 		},
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
-			Name:    "input-file",
+			Name:    "input",
 			Aliases: []string{"i"},
 			Usage:   "The input file to render",
 		}),
@@ -35,18 +35,13 @@ func NewApp() *cli.App {
 			Usage: "The input files directory to render",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "output-file",
+			Name:    "output",
 			Aliases: []string{"o"},
 			Usage:   "The output file to write to",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:  "output-dir",
 			Usage: "The output files directory to render",
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "ext",
-			Usage:       "The output file extension to use when rendering a directory",
-			DefaultText: "out",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "datasource",
@@ -105,7 +100,7 @@ func run(cCtx *cli.Context) error {
 }
 
 func handleInputs(cCtx *cli.Context, data map[string]any) error {
-	if cCtx.StringSlice("input-file") != nil {
+	if cCtx.StringSlice("input") != nil {
 		return handleFiles(cCtx, data)
 	} else if cCtx.String("input-dir") != "" {
 		return handleDirectories(cCtx, data)
@@ -127,13 +122,10 @@ func handleDirectories(cCtx *cli.Context, data map[string]any) error {
 		return fmt.Errorf("read input directory %s: %s", inputDirPathname, err)
 	}
 
-	_, err = os.Stat(outputDirPathname)
-	if err != nil {
-		err := os.Mkdir(outputDirPathname, 0755)
-		if err != nil {
-			return fmt.Errorf("create input directory %s: %s", outputDirPathname, err)
-		}
+	if err := os.MkdirAll(outputDirPathname, 0755); err != nil {
+		return fmt.Errorf("create output directory %s: %s", outputDirPathname, err)
 	}
+
 	for _, f := range inputDirFileNames {
 		inputFilePathname := fmt.Sprintf("%s/%s", inputDirPathname, f)
 		inputFile, err := os.Open(inputFilePathname)
@@ -141,7 +133,7 @@ func handleDirectories(cCtx *cli.Context, data map[string]any) error {
 			return fmt.Errorf("open input file %s: %s", inputFilePathname, err)
 		}
 		defer inputFile.Close()
-		outputFilePath := fmt.Sprintf("%s/%s.%s", outputDirPathname, f, cCtx.String("ext"))
+		outputFilePath := fmt.Sprintf("%s/%s", outputDirPathname, f)
 		outputFile, err := os.Create(outputFilePath)
 		if err != nil {
 			return fmt.Errorf("create output file %s: %s", outputFilePath, err)
@@ -156,20 +148,23 @@ func handleDirectories(cCtx *cli.Context, data map[string]any) error {
 
 func handleFiles(cCtx *cli.Context, data map[string]any) error {
 	var outputFilePathname string
-	for _, f := range cCtx.StringSlice("input-file") {
+	for _, f := range cCtx.StringSlice("input") {
 		inputFile, err := os.Open(f)
 		if err != nil {
 			return fmt.Errorf("open input file %s: %s", f, err)
 		}
 		defer inputFile.Close()
-		if len(cCtx.StringSlice("input-file")) == 1 {
-			outputFilePathname = cCtx.String("output-file")
+		if len(cCtx.StringSlice("input")) == 1 {
+			outputFilePathname = cCtx.String("output")
 		} else {
 			outputFilePathname = fmt.Sprintf("%s/%s", cCtx.String("output-dir"), filepath.Base(f))
 		}
-		outputFile, err := os.Create(fmt.Sprintf("%s.%s", outputFilePathname, cCtx.String("ext")))
+		if err := os.MkdirAll(cCtx.String("output-dir"), 0755); err != nil {
+			return fmt.Errorf("create output directory %s: %s", cCtx.String("output-dir"), err)
+		}
+		outputFile, err := os.Create(outputFilePathname)
 		if err != nil {
-			return fmt.Errorf("create output file %s.%s: %s", outputFilePathname, cCtx.String("ext"), err)
+			return fmt.Errorf("create output file %s: %s", outputFilePathname, err)
 		}
 		defer outputFile.Close()
 		if err := renderTemplate(cCtx, inputFile, outputFile, data); err != nil {
