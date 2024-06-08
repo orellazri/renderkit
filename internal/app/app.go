@@ -9,6 +9,7 @@ import (
 	"github.com/orellazri/renderkit/internal/datasource"
 	"github.com/orellazri/renderkit/internal/engine"
 	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2/altsrc"
 )
 
 func NewApp() *cli.App {
@@ -19,41 +20,44 @@ func NewApp() *cli.App {
 	}
 	enginesListStr := strings.Join(engineMapKeys, ", ")
 
-	app := &cli.App{
-		Name:  "renderkit",
-		Usage: "A swiss army knife CLI tool for rendering templates",
-		Flags: []cli.Flag{
-			&cli.PathFlag{
-				Name:     "input",
-				Aliases:  []string{"i"},
-				Usage:    "The input file to render",
-				Required: true,
-			},
-			&cli.StringSliceFlag{
-				Name:     "datasource",
-				Aliases:  []string{"d"},
-				Usage:    "The datasource to use for rendering (scheme://path)",
-				Required: true,
-			},
-			&cli.StringFlag{
-				Name:     "engine",
-				Aliases:  []string{"e"},
-				Usage:    fmt.Sprintf("The engine to use for rendering (%s)", enginesListStr),
-				Required: true,
-				Action: func(cCtx *cli.Context, value string) error {
-					if _, ok := engine.EnginesMap[value]; !ok {
-						return fmt.Errorf("engine %s not supported. supported engines:  %s", value, enginesListStr)
-					}
-					return nil
-				},
-			},
-			&cli.PathFlag{
-				Name:     "output",
-				Aliases:  []string{"o"},
-				Usage:    "The output file to write to",
-				Required: true,
-			},
+	flags := []cli.Flag{
+		&cli.StringFlag{
+			Name:  "config",
+			Usage: "Load configuration from YAML file",
 		},
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "input",
+			Aliases: []string{"i"},
+			Usage:   "The input file to render",
+		}),
+		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
+			Name:    "datasource",
+			Aliases: []string{"d"},
+			Usage:   "The datasource to use for rendering (scheme://path)",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "engine",
+			Aliases: []string{"e"},
+			Usage:   fmt.Sprintf("The engine to use for rendering (%s)", enginesListStr),
+			Action: func(cCtx *cli.Context, value string) error {
+				if _, ok := engine.EnginesMap[value]; !ok {
+					return fmt.Errorf("engine %s is not supported. supported engines: %s", value, enginesListStr)
+				}
+				return nil
+			},
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "output",
+			Aliases: []string{"o"},
+			Usage:   "The output file to write to",
+		}),
+	}
+
+	app := &cli.App{
+		Name:   "renderkit",
+		Usage:  "A swiss army knife CLI tool for rendering templates",
+		Flags:  flags,
+		Before: altsrc.InitInputSourceWithContext(flags, altsrc.NewYamlSourceFromFlagFunc("config")),
 		Action: run,
 	}
 
@@ -61,6 +65,11 @@ func NewApp() *cli.App {
 }
 
 func run(cCtx *cli.Context) error {
+	// Validate flags
+	if err := validateFlags(cCtx); err != nil {
+		return fmt.Errorf("validate flags: %s", err)
+	}
+
 	// Parse datasource URLs
 	datasourceUrls := make([]*url.URL, len(cCtx.StringSlice("datasource")))
 	for i, ds := range cCtx.StringSlice("datasource") {
@@ -104,6 +113,26 @@ func run(cCtx *cli.Context) error {
 	}
 	if err := eng.Render(cCtx.String("input"), outFile, data); err != nil {
 		return fmt.Errorf("render: %s", err)
+	}
+
+	return nil
+}
+
+func validateFlags(cCtx *cli.Context) error {
+	if len(cCtx.String("input")) == 0 {
+		return fmt.Errorf("input file is required")
+	}
+
+	if len(cCtx.StringSlice("datasource")) == 0 {
+		return fmt.Errorf("datasource is required")
+	}
+
+	if len(cCtx.String("engine")) == 0 {
+		return fmt.Errorf("engine is required")
+	}
+
+	if len(cCtx.String("output")) == 0 {
+		return fmt.Errorf("output file is required")
 	}
 
 	return nil
