@@ -9,7 +9,7 @@ import (
 )
 
 func TestJinjaRender(t *testing.T) {
-	dir := os.TempDir()
+	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
 
@@ -27,7 +27,7 @@ func TestJinjaRender(t *testing.T) {
 }
 
 func TestJinjaRenderAdvanced(t *testing.T) {
-	dir := os.TempDir()
+	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
 

@@ -10,7 +10,7 @@ import (
 )
 
 func TestRender(t *testing.T) {
-	dir := os.TempDir()
+	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
 
@@ -28,7 +28,7 @@ func TestRender(t *testing.T) {
 }
 
 func TestRenderWithExtends(t *testing.T) {
-	dir := os.TempDir()
+	dir := t.TempDir()
 	baseFile, err := os.CreateTemp(dir, "base.txt")
 	require.NoError(t, err)
 	_, err = baseFile.WriteString(`
