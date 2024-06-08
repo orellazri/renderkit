@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 
@@ -32,7 +33,7 @@ func main() {
 			&cli.StringSliceFlag{
 				Name:     "datasource",
 				Aliases:  []string{"d"},
-				Usage:    "The datasource to use for rendering",
+				Usage:    "The datasource to use for rendering (scheme://path)",
 				Required: true,
 			},
 			&cli.StringFlag{
@@ -55,25 +56,29 @@ func main() {
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
-			// Open all datasource files
-			dsFiles := make([]*os.File, 0, len(cCtx.StringSlice("datasource")))
-			for _, ds := range cCtx.StringSlice("datasource") {
-				dsFile, err := os.Open(ds)
+			// Parse datasource URLs
+			datasourceUrls := make([]*url.URL, len(cCtx.StringSlice("datasource")))
+			for i, ds := range cCtx.StringSlice("datasource") {
+				url, err := url.Parse(ds)
 				if err != nil {
-					return fmt.Errorf("open file %s: %s", ds, err)
+					return fmt.Errorf("parse datasource %s: %s", ds, err)
 				}
-				defer dsFile.Close()
-				dsFiles = append(dsFiles, dsFile)
+				datasourceUrls[i] = url
 			}
 
-			// Load all datasources
+			// Create datasources
 			data := make(map[string]any)
-			for _, dsFile := range dsFiles {
-				ds := datasource.YamlDatasource{}
-				dsData, err := ds.Load(dsFile)
+			for _, url := range datasourceUrls {
+				ds, err := datasource.CreateDatasourceFromURL(url)
 				if err != nil {
-					return fmt.Errorf("load from datasource: %s", err)
+					return fmt.Errorf("create datasource %s: %s", url, err)
 				}
+
+				dsData, err := ds.Load()
+				if err != nil {
+					return fmt.Errorf("load datasource %s: %s", url, err)
+				}
+
 				// Merge with data dictionary
 				for k, v := range dsData {
 					data[k] = v
