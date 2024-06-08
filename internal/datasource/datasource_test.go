@@ -13,4 +13,5 @@ func TestCreateYamlDatasourceFromURL(t *testing.T) {
 	ds, err := CreateDatasourceFromURL(url)
 	require.NoError(t, err)
 	require.IsType(t, &YamlDatasource{}, ds)
+	require.Equal(t, "/tmp/ds.yaml", ds.(*YamlDatasource).filepath)
 }
