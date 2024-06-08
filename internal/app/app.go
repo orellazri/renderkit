@@ -80,7 +80,7 @@ func run(cCtx *cli.Context) error {
 
 	data, err := loadDatasources(datasourceUrls, cCtx.Bool("allow-duplicate-keys"))
 	if err != nil {
-		return fmt.Errorf("create datasources: %s", err)
+		return fmt.Errorf("load datasources: %s", err)
 	}
 
 	outFile, err := os.Create(cCtx.String("output"))
