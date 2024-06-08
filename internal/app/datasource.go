@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/orellazri/renderkit/internal/datasource"
 	"github.com/urfave/cli/v2"
@@ -21,8 +22,8 @@ func parseDatasourceUrls(cCtx *cli.Context) ([]*url.URL, error) {
 	return datasourceUrls, nil
 }
 
-func loadDatasources(datasourceUrls []*url.URL, allowDuplicates bool) (map[string]any, error) {
-	duplicateKeys := []string{}
+func loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool) (map[string]any, error) {
+	duplicateKeys := []string{} // We keep track of duplicate keys to return a more informative error message
 	data := make(map[string]any)
 	for _, url := range datasourceUrls {
 		ds, err := datasource.CreateDatasourceFromURL(url)
@@ -37,7 +38,7 @@ func loadDatasources(datasourceUrls []*url.URL, allowDuplicates bool) (map[strin
 
 		// Merge with data dictionary
 		for k, v := range dsData {
-			if _, ok := data[k]; ok && !allowDuplicates {
+			if _, ok := data[k]; ok && !allowDuplicateKeys {
 				duplicateKeys = append(duplicateKeys, k)
 			}
 			data[k] = v
@@ -45,7 +46,7 @@ func loadDatasources(datasourceUrls []*url.URL, allowDuplicates bool) (map[strin
 	}
 
 	if len(duplicateKeys) > 0 {
-		return nil, fmt.Errorf("duplicate keys found in multiple datasources. keys: %v", duplicateKeys)
+		return nil, fmt.Errorf("duplicate keys found in datasources: %s", strings.Join(duplicateKeys, ", "))
 	}
 
 	return data, nil
