@@ -29,7 +29,7 @@ func main() {
 				Usage:    "The input file to render",
 				Required: true,
 			},
-			&cli.PathFlag{
+			&cli.StringSliceFlag{
 				Name:     "datasource",
 				Aliases:  []string{"d"},
 				Usage:    "The datasource to use for rendering",
@@ -55,23 +55,39 @@ func main() {
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
-			dsFile, err := os.Open(cCtx.String("datasource"))
-			if err != nil {
-				return fmt.Errorf("open file %s: %s", cCtx.String("datasource"), err)
-			}
-			defer dsFile.Close()
-			ds := datasource.YamlDatasource{}
-			data, err := ds.Load(dsFile)
-			if err != nil {
-				return fmt.Errorf("load from datasource: %s", err)
+			// Open all datasource files
+			dsFiles := make([]*os.File, 0, len(cCtx.StringSlice("datasource")))
+			for _, ds := range cCtx.StringSlice("datasource") {
+				dsFile, err := os.Open(ds)
+				if err != nil {
+					return fmt.Errorf("open file %s: %s", ds, err)
+				}
+				defer dsFile.Close()
+				dsFiles = append(dsFiles, dsFile)
 			}
 
+			// Load all datasources
+			data := make(map[string]any)
+			for _, dsFile := range dsFiles {
+				ds := datasource.YamlDatasource{}
+				dsData, err := ds.Load(dsFile)
+				if err != nil {
+					return fmt.Errorf("load from datasource: %s", err)
+				}
+				// Merge with data dictionary
+				for k, v := range dsData {
+					data[k] = v
+				}
+			}
+
+			// Create output file
 			outFile, err := os.Create(cCtx.String("output"))
 			if err != nil {
 				return fmt.Errorf("create file %s: %s", cCtx.String("output"), err)
 			}
 			defer outFile.Close()
 
+			// Render the template
 			eng, ok := engine.EnginesMap[cCtx.String("engine")]
 			if !ok {
 				return fmt.Errorf("engine %s not found", cCtx.String("engine"))
