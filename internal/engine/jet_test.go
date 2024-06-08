@@ -33,8 +33,7 @@ func TestRenderWithExtends(t *testing.T) {
 	require.NoError(t, err)
 	_, err = baseFile.WriteString(`
 Contents:
-{{ block contents() }}{{ end }}
-`)
+{{ block contents() }}{{ end }}`)
 	require.NoError(t, err)
 
 	childFile, err := os.CreateTemp(dir, "child.txt")
@@ -43,8 +42,7 @@ Contents:
 {{ extends %q }}
 {{ block contents() }}
 File contents are here
-{{ end }}
-`, baseFile.Name()))
+{{ end }}`, baseFile.Name()))
 	require.NoError(t, err)
 
 	engine := &JetEngine{}
@@ -55,6 +53,5 @@ File contents are here
 Contents:
 
 File contents are here
-
 `, writer.String())
 }

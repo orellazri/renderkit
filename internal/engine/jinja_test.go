@@ -36,8 +36,7 @@ func TestJinjaRenderAdvanced(t *testing.T) {
 	Version is: {{ v }}
 {%- endmacro %}
 
-{{ foo(version) }}
-`)
+{{ foo(version) }}`)
 	require.NoError(t, err)
 
 	engine := &JinjaEngine{}
@@ -50,6 +49,5 @@ func TestJinjaRenderAdvanced(t *testing.T) {
 	require.Equal(t, `
 
 
-Version is: 1.2.3
-`, writer.String())
+Version is: 1.2.3`, writer.String())
 }
