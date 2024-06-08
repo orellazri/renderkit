@@ -8,4 +8,5 @@ playground/
 *.dylib
 *.test
 *.out
+cover.html
 go.work
