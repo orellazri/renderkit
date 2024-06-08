@@ -3,3 +3,8 @@ tasks:
   default:
     cmds:
       - echo "Hello, World!"
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...

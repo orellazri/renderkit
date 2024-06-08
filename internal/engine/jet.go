@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"reflect"
 
 	"github.com/CloudyKit/jet/v6"
@@ -11,8 +12,13 @@ import (
 type JetEngine struct{}
 
 func (e *JetEngine) Render(file string, w io.Writer, data map[string]any) error {
-	renderer := jet.NewSet(jet.NewOSFileSystemLoader("./"))
-	tpl, err := renderer.GetTemplate(file)
+	abs, err := filepath.Abs(file)
+	if err != nil {
+		return fmt.Errorf("get absolute path: %s", err)
+	}
+
+	renderer := jet.NewSet(jet.NewOSFileSystemLoader("/"))
+	tpl, err := renderer.GetTemplate(abs)
 	if err != nil {
 		return fmt.Errorf("get template: %s", err)
 	}
