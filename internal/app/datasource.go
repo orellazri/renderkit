@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func parseDatasourceUrls(cCtx *cli.Context) ([]*url.URL, error) {
+func (a *App) parseDatasourceUrls(cCtx *cli.Context) ([]*url.URL, error) {
 	datasourceUrls := make([]*url.URL, len(cCtx.StringSlice("datasource")))
 	for i, ds := range cCtx.StringSlice("datasource") {
 		url, err := url.Parse(ds)
@@ -22,7 +22,7 @@ func parseDatasourceUrls(cCtx *cli.Context) ([]*url.URL, error) {
 	return datasourceUrls, nil
 }
 
-func loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool) (map[string]any, error) {
+func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool) (map[string]any, error) {
 	duplicateKeys := []string{} // We keep track of duplicate keys to return a more informative error message
 	data := make(map[string]any)
 	for _, url := range datasourceUrls {

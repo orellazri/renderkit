@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/orellazri/renderkit/internal/engine"
@@ -10,7 +9,22 @@ import (
 	"github.com/urfave/cli/v2/altsrc"
 )
 
-func NewApp() *cli.App {
+type Mode int
+
+const (
+	ModeFileToFile Mode = iota
+	ModeFilesToDir
+	ModeDirToDir
+)
+
+type App struct {
+	cliApp *cli.App
+	mode   Mode
+}
+
+func NewApp() *App {
+	a := App{}
+
 	// Create a list of engine names to display in the CLI help
 	engineMapKeys := make([]string, 0, len(engine.EnginesMap))
 	for k := range engine.EnginesMap {
@@ -24,10 +38,23 @@ func NewApp() *cli.App {
 			Aliases: []string{"c"},
 			Usage:   "Load configuration from YAML file",
 		},
-		altsrc.NewStringFlag(&cli.StringFlag{
+		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "input",
 			Aliases: []string{"i"},
 			Usage:   "The input file to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "output",
+			Aliases: []string{"o"},
+			Usage:   "The output file to write to",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:  "input-dir",
+			Usage: "The input directory to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:  "output-dir",
+			Usage: "The output directory to write to",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "datasource",
@@ -45,11 +72,6 @@ func NewApp() *cli.App {
 				return nil
 			},
 		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "output",
-			Aliases: []string{"o"},
-			Usage:   "The output file to write to",
-		}),
 		altsrc.NewBoolFlag(&cli.BoolFlag{
 			Name:        "allow-duplicate-keys",
 			Usage:       "Allow duplicate keys in datasources. If set, the last value found will be used",
@@ -62,35 +84,38 @@ func NewApp() *cli.App {
 		Usage:  "A swiss army knife CLI tool for rendering templates",
 		Flags:  flags,
 		Before: altsrc.InitInputSourceWithContext(flags, altsrc.NewYamlSourceFromFlagFunc("config")),
-		Action: run,
+		Action: a.run,
 	}
 
-	return app
+	a.cliApp = app
+	return &a
 }
 
-func run(cCtx *cli.Context) error {
-	if err := validateFlags(cCtx); err != nil {
+func (a *App) Run(args []string) error {
+	return a.cliApp.Run(args)
+}
+
+func (a *App) run(cCtx *cli.Context) error {
+	if err := a.validateFlags(cCtx); err != nil {
 		return fmt.Errorf("validate flags: %s", err)
 	}
 
-	datasourceUrls, err := parseDatasourceUrls(cCtx)
+	if err := a.setMode(cCtx); err != nil {
+		return fmt.Errorf("set mode: %s", err)
+	}
+
+	datasourceUrls, err := a.parseDatasourceUrls(cCtx)
 	if err != nil {
 		return fmt.Errorf("parse datasource URLs: %s", err)
 	}
 
-	data, err := loadDatasources(datasourceUrls, cCtx.Bool("allow-duplicate-keys"))
+	data, err := a.loadDatasources(datasourceUrls, cCtx.Bool("allow-duplicate-keys"))
 	if err != nil {
 		return fmt.Errorf("load datasources: %s", err)
 	}
 
-	outFile, err := os.Create(cCtx.String("output"))
-	if err != nil {
-		return fmt.Errorf("create output file %s: %s", cCtx.String("output"), err)
-	}
-	defer outFile.Close()
-
-	if err := renderTemplate(cCtx, outFile, data); err != nil {
-		return fmt.Errorf("render template: %s", err)
+	if err := a.render(cCtx, data); err != nil {
+		return fmt.Errorf("render: %s", err)
 	}
 
 	return nil
