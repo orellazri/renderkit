@@ -50,6 +50,11 @@ func NewApp() *cli.App {
 			Aliases: []string{"o"},
 			Usage:   "The output file to write to",
 		}),
+		altsrc.NewBoolFlag(&cli.BoolFlag{
+			Name:        "allow-duplicate-keys",
+			Usage:       "Allow duplicate keys in datasources. If set, the last value found will be used",
+			DefaultText: "false",
+		}),
 	}
 
 	app := &cli.App{
@@ -73,7 +78,7 @@ func run(cCtx *cli.Context) error {
 		return fmt.Errorf("parse datasource URLs: %s", err)
 	}
 
-	data, err := loadDatasources(datasourceUrls)
+	data, err := loadDatasources(datasourceUrls, cCtx.Bool("allow-duplicate-keys"))
 	if err != nil {
 		return fmt.Errorf("create datasources: %s", err)
 	}

@@ -21,7 +21,8 @@ func parseDatasourceUrls(cCtx *cli.Context) ([]*url.URL, error) {
 	return datasourceUrls, nil
 }
 
-func loadDatasources(datasourceUrls []*url.URL) (map[string]any, error) {
+func loadDatasources(datasourceUrls []*url.URL, allowDuplicates bool) (map[string]any, error) {
+	duplicateKeys := []string{}
 	data := make(map[string]any)
 	for _, url := range datasourceUrls {
 		ds, err := datasource.CreateDatasourceFromURL(url)
@@ -36,8 +37,15 @@ func loadDatasources(datasourceUrls []*url.URL) (map[string]any, error) {
 
 		// Merge with data dictionary
 		for k, v := range dsData {
+			if _, ok := data[k]; ok && !allowDuplicates {
+				duplicateKeys = append(duplicateKeys, k)
+			}
 			data[k] = v
 		}
+	}
+
+	if len(duplicateKeys) > 0 {
+		return nil, fmt.Errorf("duplicate keys found in multiple datasources. keys: %v", duplicateKeys)
 	}
 
 	return data, nil
