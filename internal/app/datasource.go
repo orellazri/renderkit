@@ -54,7 +54,7 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 
 func (a *App) createDatasourceFromURL(url *url.URL) (datasource.Datasource, error) {
 	switch url.Scheme {
-	case "", "file":
+	case "":
 		switch filepath.Ext(url.Path) {
 		case ".yaml", ".yml":
 			return datasource.NewYamlDatasource(url.Path), nil
