@@ -6,31 +6,25 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func checkFlag(cCtx *cli.Context, flag1, flag2 string) error {
-	if len(cCtx.String(flag1)) != 0 && len(cCtx.String(flag2)) != 0 {
-		return fmt.Errorf("the flags \"%s\" and \"%s\" are mutually exclusive", flag1, flag2)
-	}
-	if len(cCtx.String(flag1)) == 0 && len(cCtx.String(flag2)) == 0 {
-		return fmt.Errorf("either the \"%s\" flag or the \"%s\" flag is required", flag1, flag2)
-	}
-	return nil
-}
-
 func validateFlags(cCtx *cli.Context) error {
-	if err := checkFlag(cCtx, "input", "input-dir"); err != nil {
-		return err
+	if len(cCtx.StringSlice("input-file")) != 0 && len(cCtx.String("input-dir")) != 0 {
+		return fmt.Errorf("the flags \"input-file\" and \"input-dir\" are mutually exclusive")
 	}
 
-	if err := checkFlag(cCtx, "output", "output-dir"); err != nil {
-		return err
+	if len(cCtx.String("output-file")) != 0 && len(cCtx.String("output-dir")) != 0 {
+		return fmt.Errorf("the flags \"output-file\" and \"output-dir\" are mutually exclusive")
 	}
 
 	if len(cCtx.String("input-dir")) != 0 && len(cCtx.String("output-dir")) == 0 {
 		return fmt.Errorf("if input-dir is present, output-dir must be present")
 	}
 
-	if len(cCtx.String("output-dir")) != 0 && len(cCtx.String("input-dir")) == 0 {
-		return fmt.Errorf("if output-dir is present, input-dir must be present")
+	if len(cCtx.StringSlice("input-file")) == 1 && cCtx.String("output-dir") != "" {
+		return fmt.Errorf("if input-file has one file, output-dir must not be present")
+	}
+
+	if len(cCtx.StringSlice("input-file")) > 1 && cCtx.String("output-file") != "" {
+		return fmt.Errorf("if multiple input-files are present, output-file must not be present")
 	}
 
 	if len(cCtx.StringSlice("datasource")) == 0 {
