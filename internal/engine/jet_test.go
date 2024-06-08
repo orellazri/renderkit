@@ -43,7 +43,8 @@ Contents:
 {{ extends %q }}
 {{ block contents() }}
 File contents are here
-{{ end }}`, baseFile.Name()))
+{{ end }}
+`, baseFile.Name()))
 	require.NoError(t, err)
 
 	engine := &JetEngine{}
