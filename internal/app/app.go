@@ -25,9 +25,27 @@ func NewApp() *cli.App {
 			Usage:   "Load configuration from YAML file",
 		},
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "input",
+			Name:    "input-file",
 			Aliases: []string{"i"},
 			Usage:   "The input file to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:  "input-dir",
+			Usage: "The input files directory to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "output-file",
+			Aliases: []string{"o"},
+			Usage:   "The output file to write to",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:  "output-dir",
+			Usage: "The output files directory to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "ext",
+			Usage:       "The output file extension to use when rendering a directory",
+			DefaultText: ".out",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "datasource",
@@ -44,16 +62,6 @@ func NewApp() *cli.App {
 				}
 				return nil
 			},
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "output",
-			Aliases: []string{"o"},
-			Usage:   "The output file to write to",
-		}),
-		altsrc.NewBoolFlag(&cli.BoolFlag{
-			Name:        "allow-duplicate-keys",
-			Usage:       "Allow duplicate keys in datasources. If set, the last value found will be used",
-			DefaultText: "false",
 		}),
 	}
 
@@ -83,15 +91,76 @@ func run(cCtx *cli.Context) error {
 		return fmt.Errorf("load datasources: %s", err)
 	}
 
-	outFile, err := os.Create(cCtx.String("output"))
-	if err != nil {
-		return fmt.Errorf("create output file %s: %s", cCtx.String("output"), err)
+	if err := handleInputs(cCtx, data); err != nil {
+		return fmt.Errorf("handle inputs: %s", err)
 	}
-	defer outFile.Close()
 
-	if err := renderTemplate(cCtx, outFile, data); err != nil {
+	return nil
+}
+
+func handleInputs(cCtx *cli.Context, data map[string]any) error {
+	if cCtx.String("input-file") != "" {
+		return handleFiles(cCtx, data)
+	} else if cCtx.String("input-dir") != "" {
+		return handleDirectories(cCtx, data)
+	}
+	return nil
+}
+
+func handleDirectories(cCtx *cli.Context, data map[string]any) error {
+	inputDirPathname := cCtx.String("input-dir")
+	outputDirPathname := cCtx.String("output-dir")
+
+	inputDir, err := os.Open(inputDirPathname)
+	if err != nil {
+		return fmt.Errorf("open input directory %s: %s", inputDirPathname, err)
+	}
+	defer inputDir.Close()
+	inputDirFileNames, err := inputDir.Readdirnames(-1)
+	if err != nil {
+		return fmt.Errorf("read input directory %s: %s", inputDirPathname, err)
+	}
+
+	_, err = os.Stat(outputDirPathname)
+	if err != nil {
+		err := os.Mkdir(outputDirPathname, 0755)
+		if err != nil {
+			return fmt.Errorf("create input directory %s: %s", outputDirPathname, err)
+		}
+	}
+	for _, f := range inputDirFileNames {
+		inputFilePathname := fmt.Sprintf("%s/%s", inputDirPathname, f)
+		inputFile, err := os.Open(inputFilePathname)
+		if err != nil {
+			return fmt.Errorf("open input file %s: %s", inputFilePathname, err)
+		}
+		defer inputFile.Close()
+		outputFilePath := fmt.Sprintf("%s/%s%s", outputDirPathname, f, cCtx.String("ext"))
+		outputFile, err := os.Create(outputFilePath)
+		if err != nil {
+			return fmt.Errorf("create output file %s: %s", outputFilePath, err)
+		}
+		defer outputFile.Close()
+		if err := renderTemplate(cCtx, inputFile, outputFile, data); err != nil {
+			return fmt.Errorf("render template: %s", err)
+		}
+	}
+	return nil
+}
+
+func handleFiles(cCtx *cli.Context, data map[string]any) error {
+	inputFile, err := os.Open(cCtx.String("input-file"))
+	if err != nil {
+		return fmt.Errorf("open input file %s: %s", cCtx.String("input-file"), err)
+	}
+	defer inputFile.Close()
+	outputFile, err := os.Create(cCtx.String("output-file"))
+	if err != nil {
+		return fmt.Errorf("create output file %s: %s", cCtx.String("output-file"), err)
+	}
+	defer outputFile.Close()
+	if err := renderTemplate(cCtx, inputFile, outputFile, data); err != nil {
 		return fmt.Errorf("render template: %s", err)
 	}
-
 	return nil
 }
