@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/url"
+	"path/filepath"
 	"strings"
 
 	"github.com/orellazri/renderkit/internal/datasource"
@@ -25,7 +26,7 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 	duplicateKeys := []string{} // We keep track of duplicate keys to return a more informative error message
 	data := make(map[string]any)
 	for _, url := range datasourceUrls {
-		ds, err := datasource.CreateDatasourceFromURL(url)
+		ds, err := a.createDatasourceFromURL(url)
 		if err != nil {
 			return nil, fmt.Errorf("create datasource %s: %s", url, err)
 		}
@@ -49,4 +50,20 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 	}
 
 	return data, nil
+}
+
+func (a *App) createDatasourceFromURL(url *url.URL) (datasource.Datasource, error) {
+	switch url.Scheme {
+	case "", "file":
+		switch filepath.Ext(url.Path) {
+		case ".yaml", ".yml":
+			return datasource.NewYamlDatasource(url.Path), nil
+		case ".json":
+			return datasource.NewJsonDatasource(url.Path), nil
+		default:
+			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(url.Path))
+		}
+	default:
+		return nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
+	}
 }
