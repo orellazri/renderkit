@@ -20,6 +20,7 @@ const (
 type App struct {
 	cliApp *cli.App
 	mode   Mode
+	engine engine.Engine
 }
 
 func NewApp() *App {
@@ -102,6 +103,10 @@ func (a *App) run(cCtx *cli.Context) error {
 
 	if err := a.setMode(cCtx); err != nil {
 		return fmt.Errorf("set mode: %s", err)
+	}
+
+	if err := a.setEngine(cCtx); err != nil {
+		return fmt.Errorf("set engine: %s", err)
 	}
 
 	datasourceUrls, err := a.parseDatasourceUrls(cCtx)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/orellazri/renderkit/internal/engine"
 	"github.com/urfave/cli/v2"
 )
 
@@ -49,6 +50,16 @@ func (a *App) setMode(cCtx *cli.Context) error {
 	} else {
 		return errors.New("unsupported mode")
 	}
+
+	return nil
+}
+
+func (a *App) setEngine(cCtx *cli.Context) error {
+	eng, ok := engine.EnginesMap[cCtx.String("engine")]
+	if !ok {
+		return fmt.Errorf("engine %s not found", cCtx.String("engine"))
+	}
+	a.engine = eng
 
 	return nil
 }

@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/orellazri/renderkit/internal/engine"
 	"github.com/urfave/cli/v2"
 )
 
@@ -29,7 +28,7 @@ func (a *App) renderFileToFile(cCtx *cli.Context, data map[string]any) error {
 	}
 	defer outFile.Close()
 
-	if err := a.renderTemplate(cCtx, cCtx.StringSlice("input")[0], outFile, data); err != nil {
+	if err := a.renderTemplate(cCtx.StringSlice("input")[0], outFile, data); err != nil {
 		return fmt.Errorf("render template: %s", err)
 	}
 
@@ -48,7 +47,7 @@ func (a *App) renderFilesToDir(cCtx *cli.Context, data map[string]any) error {
 			return fmt.Errorf("create output file %s: %s", outFilename, err)
 		}
 		defer outFile.Close()
-		if err := a.renderTemplate(cCtx, inFilename, outFile, data); err != nil {
+		if err := a.renderTemplate(inFilename, outFile, data); err != nil {
 			return fmt.Errorf("render template: %s", err)
 		}
 	}
@@ -73,7 +72,7 @@ func (a *App) renderDirToDir(cCtx *cli.Context, data map[string]any) error {
 			return fmt.Errorf("create output file %s: %s", outFilename, err)
 		}
 		defer outFile.Close()
-		if err := a.renderTemplate(cCtx, filepath.Join(cCtx.String("input-dir"), inFilename.Name()), outFile, data); err != nil {
+		if err := a.renderTemplate(filepath.Join(cCtx.String("input-dir"), inFilename.Name()), outFile, data); err != nil {
 			return fmt.Errorf("render template: %s", err)
 		}
 	}
@@ -81,12 +80,8 @@ func (a *App) renderDirToDir(cCtx *cli.Context, data map[string]any) error {
 	return nil
 }
 
-func (a *App) renderTemplate(cCtx *cli.Context, inFilename string, outFile *os.File, data map[string]any) error {
-	eng, ok := engine.EnginesMap[cCtx.String("engine")]
-	if !ok {
-		return fmt.Errorf("engine %s not found", cCtx.String("engine"))
-	}
-	if err := eng.Render(inFilename, outFile, data); err != nil {
+func (a *App) renderTemplate(inFilename string, outFile *os.File, data map[string]any) error {
+	if err := a.engine.Render(inFilename, outFile, data); err != nil {
 		return fmt.Errorf("render: %s", err)
 	}
 
