@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/orellazri/renderkit/internal/engine"
@@ -24,7 +25,7 @@ func NewApp() *cli.App {
 			Aliases: []string{"c"},
 			Usage:   "Load configuration from YAML file",
 		},
-		altsrc.NewStringFlag(&cli.StringFlag{
+		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "input-file",
 			Aliases: []string{"i"},
 			Usage:   "The input file to render",
@@ -45,7 +46,7 @@ func NewApp() *cli.App {
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "ext",
 			Usage:       "The output file extension to use when rendering a directory",
-			DefaultText: ".out",
+			DefaultText: "out",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "datasource",
@@ -62,6 +63,11 @@ func NewApp() *cli.App {
 				}
 				return nil
 			},
+		}),
+		altsrc.NewBoolFlag(&cli.BoolFlag{
+			Name:        "allow-duplicate-keys",
+			Usage:       "Allow duplicate keys in datasources. If set, the last value found will be used",
+			DefaultText: "false",
 		}),
 	}
 
@@ -99,7 +105,7 @@ func run(cCtx *cli.Context) error {
 }
 
 func handleInputs(cCtx *cli.Context, data map[string]any) error {
-	if cCtx.String("input-file") != "" {
+	if cCtx.StringSlice("input-file") != nil {
 		return handleFiles(cCtx, data)
 	} else if cCtx.String("input-dir") != "" {
 		return handleDirectories(cCtx, data)
@@ -135,7 +141,7 @@ func handleDirectories(cCtx *cli.Context, data map[string]any) error {
 			return fmt.Errorf("open input file %s: %s", inputFilePathname, err)
 		}
 		defer inputFile.Close()
-		outputFilePath := fmt.Sprintf("%s/%s%s", outputDirPathname, f, cCtx.String("ext"))
+		outputFilePath := fmt.Sprintf("%s/%s.%s", outputDirPathname, f, cCtx.String("ext"))
 		outputFile, err := os.Create(outputFilePath)
 		if err != nil {
 			return fmt.Errorf("create output file %s: %s", outputFilePath, err)
@@ -149,18 +155,26 @@ func handleDirectories(cCtx *cli.Context, data map[string]any) error {
 }
 
 func handleFiles(cCtx *cli.Context, data map[string]any) error {
-	inputFile, err := os.Open(cCtx.String("input-file"))
-	if err != nil {
-		return fmt.Errorf("open input file %s: %s", cCtx.String("input-file"), err)
-	}
-	defer inputFile.Close()
-	outputFile, err := os.Create(cCtx.String("output-file"))
-	if err != nil {
-		return fmt.Errorf("create output file %s: %s", cCtx.String("output-file"), err)
-	}
-	defer outputFile.Close()
-	if err := renderTemplate(cCtx, inputFile, outputFile, data); err != nil {
-		return fmt.Errorf("render template: %s", err)
+	var outputFilePathname string
+	for _, f := range cCtx.StringSlice("input-file") {
+		inputFile, err := os.Open(f)
+		if err != nil {
+			return fmt.Errorf("open input file %s: %s", f, err)
+		}
+		defer inputFile.Close()
+		if len(cCtx.StringSlice("input-file")) == 1 {
+			outputFilePathname = cCtx.String("output-file")
+		} else {
+			outputFilePathname = fmt.Sprintf("%s/%s", cCtx.String("output-dir"), filepath.Base(f))
+		}
+		outputFile, err := os.Create(fmt.Sprintf("%s.%s", outputFilePathname, cCtx.String("ext")))
+		if err != nil {
+			return fmt.Errorf("create output file %s.%s: %s", outputFilePathname, cCtx.String("ext"), err)
+		}
+		defer outputFile.Close()
+		if err := renderTemplate(cCtx, inputFile, outputFile, data); err != nil {
+			return fmt.Errorf("render template: %s", err)
+		}
 	}
 	return nil
 }
