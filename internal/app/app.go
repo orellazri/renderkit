@@ -20,8 +20,9 @@ func NewApp() *cli.App {
 
 	flags := []cli.Flag{
 		&cli.StringFlag{
-			Name:  "config",
-			Usage: "Load configuration from YAML file",
+			Name:    "config",
+			Aliases: []string{"c"},
+			Usage:   "Load configuration from YAML file",
 		},
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "input",
