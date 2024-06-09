@@ -21,6 +21,7 @@
 
 ### Supported Datasources
 
+- Environment variables
 - YAML
 - JSON
 - TOML
@@ -41,6 +42,7 @@ Run the `renderkit` command with the following arguments as either command-line 
 | `datasource`           | The datasource to use for rendering (scheme://path)                            | list   |
 | `engine`               | The templating engine to use for rendering                                     | string |
 | `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
+| `load-from-env`        | Load datasource keys from environment variables                                | bool   |
 
 This tool supports 3 modes:
 
