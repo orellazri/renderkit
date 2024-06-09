@@ -1,4 +1,7 @@
 <div align="center">
+
+<img src="assets/logo.svg" alt="Render Kit Logo" width="150px" align="right" />
+
 <h1>Render Kit</h1>
 
 A versatile and powerful command-line interface (CLI) tool designed for comprehensive template rendering. It supports multiple template engines and data sources, providing both flexibility and efficiency.
