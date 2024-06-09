@@ -8,6 +8,11 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var enginesMap = map[string]engine.Engine{
+	"jet":   &engine.JetEngine{},
+	"jinja": &engine.JinjaEngine{},
+}
+
 func (a *App) validateFlags(cCtx *cli.Context) error {
 	if len(cCtx.StringSlice("input")) > 0 && len(cCtx.String("input-dir")) > 0 {
 		return fmt.Errorf("the flags \"input\" and \"input-dir\" are mutually exclusive")
@@ -55,11 +60,11 @@ func (a *App) setMode(input []string, inputDir string) error {
 }
 
 func (a *App) setEngine(engineStr string) error {
-	eng, ok := engine.EnginesMap[engineStr]
+	e, ok := enginesMap[engineStr]
 	if !ok {
-		return fmt.Errorf("engine %s not found", engineStr)
+		return fmt.Errorf("unsupported engine: %s", engineStr)
 	}
-	a.engine = eng
+	a.engine = e
 
 	return nil
 }

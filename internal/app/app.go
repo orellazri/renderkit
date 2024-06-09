@@ -27,8 +27,8 @@ func NewApp() *App {
 	a := App{}
 
 	// Create a list of engine names to display in the CLI help
-	engineMapKeys := make([]string, 0, len(engine.EnginesMap))
-	for k := range engine.EnginesMap {
+	engineMapKeys := make([]string, 0, len(enginesMap))
+	for k := range enginesMap {
 		engineMapKeys = append(engineMapKeys, k)
 	}
 	enginesListStr := strings.Join(engineMapKeys, ", ")
@@ -67,7 +67,7 @@ func NewApp() *App {
 			Aliases: []string{"e"},
 			Usage:   fmt.Sprintf("The templating engine to use for rendering (%s)", enginesListStr),
 			Action: func(cCtx *cli.Context, value string) error {
-				if _, ok := engine.EnginesMap[value]; !ok {
+				if _, ok := enginesMap[value]; !ok {
 					return fmt.Errorf("engine %s is not supported. supported engines: %s", value, enginesListStr)
 				}
 				return nil
