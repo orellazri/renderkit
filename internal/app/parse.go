@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -32,9 +33,10 @@ func (a *App) parseDatasourceUrls(datasources []string) ([]*url.URL, error) {
 	return datasourceUrls, nil
 }
 
-func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool) (map[string]any, error) {
+func (a *App) loadDatasources(datasourceUrls []*url.URL, loadFromEnv bool, allowDuplicateKeys bool) (map[string]any, error) {
 	duplicateKeys := []string{} // We keep track of duplicate keys to return a more informative error message
 	data := make(map[string]any)
+	// Load datasources
 	for _, url := range datasourceUrls {
 		ds, err := a.createDatasourceFromURL(url)
 		if err != nil {
@@ -48,6 +50,16 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 
 		// Merge with data dictionary
 		for k, v := range dsData {
+			if _, ok := data[k]; ok && !allowDuplicateKeys {
+				duplicateKeys = append(duplicateKeys, k)
+			}
+			data[k] = v
+		}
+	}
+	// Load datasource keys from environment variables, if option is enabled
+	if loadFromEnv {
+		ds := datasource.NewEnvDatasource(os.Environ())
+		for k, v := range ds.Load() {
 			if _, ok := data[k]; ok && !allowDuplicateKeys {
 				duplicateKeys = append(duplicateKeys, k)
 			}
