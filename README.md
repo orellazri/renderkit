@@ -9,6 +9,7 @@
 - 🎛️ Customizable rendering options
 - ⚡ Lightweight and fast
 - 🌍 Cross-platform compatibility
+- 📦 Single binary
 
 ### Supported Engines
 
