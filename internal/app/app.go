@@ -65,7 +65,7 @@ func NewApp() *App {
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "engine",
 			Aliases: []string{"e"},
-			Usage:   fmt.Sprintf("The engine to use for rendering (%s)", enginesListStr),
+			Usage:   fmt.Sprintf("The templating engine to use for rendering (%s)", enginesListStr),
 			Action: func(cCtx *cli.Context, value string) error {
 				if _, ok := engine.EnginesMap[value]; !ok {
 					return fmt.Errorf("engine %s is not supported. supported engines: %s", value, enginesListStr)
