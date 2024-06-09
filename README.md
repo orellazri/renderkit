@@ -1,7 +1,7 @@
 <div align="center">
 <h1>Render Kit</h1>
 
-A versatile and powerful command-line interface (CLI) tool designed to handle all your template rendering needs. Supports various template engines and datasources, offering flexibility and efficiency.
+A versatile and powerful command-line interface (CLI) tool designed for comprehensive template rendering. It supports multiple template engines and data sources, providing both flexibility and efficiency.
 
 </div>
 
