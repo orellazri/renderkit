@@ -16,6 +16,7 @@ A versatile and powerful command-line interface (CLI) tool designed to handle al
 ### Supported Engines
 
 - Jinja
+- Mustache
 - Jet
 
 ### Supported Datasources

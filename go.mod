@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/CloudyKit/jet/v6 v6.2.0
+	github.com/cbroglie/mustache v1.4.0
 	github.com/nikolalohinski/gonja/v2 v2.2.2
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
