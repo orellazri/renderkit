@@ -1,17 +1,10 @@
 package app
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/orellazri/renderkit/internal/engine"
 	"github.com/urfave/cli/v2"
 )
-
-var enginesMap = map[string]engine.Engine{
-	"jet":   &engine.JetEngine{},
-	"jinja": &engine.JinjaEngine{},
-}
 
 func (a *App) validateFlags(cCtx *cli.Context) error {
 	if len(cCtx.StringSlice("input")) > 0 && len(cCtx.String("input-dir")) > 0 {
@@ -41,30 +34,6 @@ func (a *App) validateFlags(cCtx *cli.Context) error {
 	if len(cCtx.String("engine")) == 0 {
 		return fmt.Errorf("engine is required")
 	}
-
-	return nil
-}
-
-func (a *App) setMode(input []string, inputDir string) error {
-	if len(input) == 1 {
-		a.mode = ModeFileToFile
-	} else if len(input) > 1 {
-		a.mode = ModeFilesToDir
-	} else if len(inputDir) > 0 {
-		a.mode = ModeDirToDir
-	} else {
-		return errors.New("unsupported mode")
-	}
-
-	return nil
-}
-
-func (a *App) setEngine(engineStr string) error {
-	e, ok := enginesMap[engineStr]
-	if !ok {
-		return fmt.Errorf("unsupported engine: %s", engineStr)
-	}
-	a.engine = e
 
 	return nil
 }

@@ -1,13 +1,20 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
 	"strings"
 
 	"github.com/orellazri/renderkit/internal/datasource"
+	"github.com/orellazri/renderkit/internal/engine"
 )
+
+var enginesMap = map[string]engine.Engine{
+	"jet":   &engine.JetEngine{},
+	"jinja": &engine.JinjaEngine{},
+}
 
 func (a *App) parseDatasourceUrls(datasources []string) ([]*url.URL, error) {
 	datasourceUrls := make([]*url.URL, len(datasources))
@@ -66,4 +73,28 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasource.Datasource, erro
 	default:
 		return nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
 	}
+}
+
+func (a *App) setMode(input []string, inputDir string) error {
+	if len(input) == 1 {
+		a.mode = ModeFileToFile
+	} else if len(input) > 1 {
+		a.mode = ModeFilesToDir
+	} else if len(inputDir) > 0 {
+		a.mode = ModeDirToDir
+	} else {
+		return errors.New("unsupported mode")
+	}
+
+	return nil
+}
+
+func (a *App) setEngine(engineStr string) error {
+	e, ok := enginesMap[engineStr]
+	if !ok {
+		return fmt.Errorf("unsupported engine: %s", engineStr)
+	}
+	a.engine = e
+
+	return nil
 }
