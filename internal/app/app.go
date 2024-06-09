@@ -62,11 +62,6 @@ func NewApp() *App {
 			Aliases: []string{"d"},
 			Usage:   "The datasource to use for rendering (scheme://path)",
 		}),
-		altsrc.NewBoolFlag(&cli.BoolFlag{
-			Name:    "load-from-env",
-			Aliases: []string{"env"},
-			Usage:   "Load datasource keys from environment variables",
-		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "engine",
 			Aliases: []string{"e"},
@@ -129,7 +124,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("parse datasource URLs: %s", err)
 	}
 
-	data, err := a.loadDatasources(datasourceUrls, cCtx.Bool("load-from-env"), cCtx.Bool("allow-duplicate-keys"))
+	data, err := a.loadDatasources(datasourceUrls, cCtx.Bool("allow-duplicate-keys"))
 	if err != nil {
 		return fmt.Errorf("load datasources: %s", err)
 	}
