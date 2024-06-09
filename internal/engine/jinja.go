@@ -13,7 +13,7 @@ type JinjaEngine struct{}
 func (e *JinjaEngine) Render(file string, w io.Writer, data map[string]any) error {
 	template, err := gonja.FromFile(file)
 	if err != nil {
-		return fmt.Errorf("parse file %s: %s", file, err)
+		return fmt.Errorf("parse file %q: %s", file, err)
 	}
 
 	dataCtx := exec.NewContext(data)
