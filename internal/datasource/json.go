@@ -2,7 +2,6 @@ package datasource
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -17,7 +16,7 @@ func NewJsonDatasource(filepath string) *JsonDatasource {
 func (ds *JsonDatasource) Load() (map[string]any, error) {
 	file, err := os.Open(ds.filepath)
 	if err != nil {
-		return nil, fmt.Errorf("open file %s: %s", ds.filepath, err)
+		return nil, err
 	}
 	defer file.Close()
 

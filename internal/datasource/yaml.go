@@ -1,7 +1,6 @@
 package datasource
 
 import (
-	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -18,7 +17,7 @@ func NewYamlDatasource(filepath string) *YamlDatasource {
 func (ds *YamlDatasource) Load() (map[string]any, error) {
 	file, err := os.Open(ds.filepath)
 	if err != nil {
-		return nil, fmt.Errorf("open file %s: %s", ds.filepath, err)
+		return nil, err
 	}
 	defer file.Close()
 

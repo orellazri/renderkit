@@ -28,12 +28,12 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 	for _, url := range datasourceUrls {
 		ds, err := a.createDatasourceFromURL(url)
 		if err != nil {
-			return nil, fmt.Errorf("create datasource %s: %s", url, err)
+			return nil, fmt.Errorf("create datasource %q: %s", url, err)
 		}
 
 		dsData, err := ds.Load()
 		if err != nil {
-			return nil, fmt.Errorf("load datasource %s: %s", url, err)
+			return nil, fmt.Errorf("load datasource %q: %s", url, err)
 		}
 
 		// Merge with data dictionary
