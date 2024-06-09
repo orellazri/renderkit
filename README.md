@@ -65,6 +65,19 @@ Render all files in an input directory to an output directory.
 renderkit --input-dir input --output-dir output --datasource data.yaml --engine jinja
 ```
 
+### Example YAML Configuration File
+
+```yaml
+input:
+  - input.tpl
+output: output.txt
+datasource:
+  - data.yaml
+  - data2.json
+engine: jinja
+allow-duplicate-keys: true
+```
+
 ## Development
 
 ### Prerequisites
