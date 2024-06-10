@@ -13,9 +13,10 @@
 
 ### Supported Engines
 
+- Go Templates
 - Jinja
-- Mustache
 - Handlebars
+- Mustache
 - Jet
 
 ### Supported Datasources

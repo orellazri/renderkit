@@ -12,10 +12,11 @@ import (
 )
 
 var enginesMap = map[string]engine.Engine{
-	"jet":        &engine.JetEngine{},
+	"go":         &engine.GoTemplatesEngine{},
 	"jinja":      &engine.JinjaEngine{},
-	"mustache":   &engine.MustacheEngine{},
 	"handlebars": &engine.HandlebarsEngine{},
+	"mustache":   &engine.MustacheEngine{},
+	"jet":        &engine.JetEngine{},
 }
 
 func (a *App) parseDatasourceUrls(datasources []string) ([]*url.URL, error) {
