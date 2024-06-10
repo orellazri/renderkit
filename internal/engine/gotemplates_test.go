@@ -45,3 +45,23 @@ func TestGoTemplatesRenderAdvanced(t *testing.T) {
 	require.Equal(t, `
 Hi John<br>Hi Doe<br>`, writer.String())
 }
+
+func TestGoTemplatesRenderWithSprigFunctions(t *testing.T) {
+	dir := t.TempDir()
+	file, err := os.CreateTemp(dir, "test.txt")
+	require.NoError(t, err)
+
+	_, err = file.WriteString(`
+{{ "hello!" | upper | repeat 5 }}`)
+	require.NoError(t, err)
+
+	engine := &GoTemplatesEngine{}
+	writer := &bytes.Buffer{}
+	err = engine.Render(file.Name(), writer, map[string]any{
+		"names": []string{"John", "Doe"},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, `
+HELLO!HELLO!HELLO!HELLO!HELLO!`, writer.String())
+}
