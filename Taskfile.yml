@@ -1,5 +1,14 @@
 version: "3"
 tasks:
+  default:
+    cmds:
+      - task: run
+
+  run:
+    desc: Run the application with playground data
+    cmds:
+      - go run cmd/renderkit/main.go --config playground/renderkit.yml
+
   test:
     desc: Run tests
     cmds:
