@@ -23,6 +23,7 @@
 
 - YAML
 - JSON
+- TOML
 
 ## Usage
 
