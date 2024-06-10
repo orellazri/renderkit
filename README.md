@@ -15,6 +15,7 @@
 
 - Jinja
 - Mustache
+- Handlebars
 - Jet
 
 ### Supported Datasources
