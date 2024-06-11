@@ -9,7 +9,7 @@ import (
 func (a *App) render(input []string, output, inputDir, outputDir string, data map[string]any) error {
 	switch a.mode {
 	case ModeFileToFile:
-		return a.renderFileToFile(input, output, data)
+		return a.renderFileToFile(input[0], output, data)
 	case ModeFilesToDir:
 		return a.renderFilesToDir(input, outputDir, data)
 	case ModeDirToDir:
@@ -19,8 +19,8 @@ func (a *App) render(input []string, output, inputDir, outputDir string, data ma
 	return nil
 }
 
-func (a *App) renderFileToFile(input []string, output string, data map[string]any) error {
-	return a.renderFile(input[0], output, data)
+func (a *App) renderFileToFile(input string, output string, data map[string]any) error {
+	return a.renderFile(input, output, data)
 }
 
 func (a *App) renderFilesToDir(input []string, outputDir string, data map[string]any) error {
