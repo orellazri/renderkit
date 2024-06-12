@@ -9,6 +9,11 @@ tasks:
     cmds:
       - go run cmd/renderkit/main.go --config playground/renderkit.yml
 
+  local-release:
+    desc: Build release locally
+    cmds:
+      - goreleaser release --snapshot --clean
+
   test:
     desc: Run tests
     cmds:
