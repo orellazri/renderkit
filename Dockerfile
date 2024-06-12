@@ -8,4 +8,4 @@ RUN go mod download
 COPY . .
 RUN go build -o /app/renderkit cmd/renderkit/main.go
 
-CMD ["/app/renderkit"]
+ENTRYPOINT ["/app/renderkit"]
