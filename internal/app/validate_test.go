@@ -26,10 +26,30 @@ func TestValidateFlagsNoEngine(t *testing.T) {
 	require.Contains(t, err.Error(), "engine is required")
 }
 
+func TestValidateFlagsNoInput(t *testing.T) {
+	app := NewApp()
+	args := []string{"", "--datasource", "ds.yaml", "--engine", "gotemplates",
+		"--output", "output.txt",
+	}
+	err := app.Run(args)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "either input or input-dir is required")
+}
+
+func TestValidateFlagsNoOutput(t *testing.T) {
+	app := NewApp()
+	args := []string{"", "--datasource", "ds.yaml", "--engine", "gotemplates",
+		"--input", "file.txt",
+	}
+	err := app.Run(args)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "either output or output-dir is required")
+}
+
 func TestValidateFlagsInputAndInputDir(t *testing.T) {
 	app := NewApp()
 	args := []string{"", "--datasource", "ds.yaml", "--engine", "gotemplates",
-		"--input", "file.txt", "--input-dir", "dir",
+		"--input", "file.txt", "--input-dir", "dir", "--output", "output.txt",
 	}
 	err := app.Run(args)
 	require.Error(t, err)
@@ -39,7 +59,7 @@ func TestValidateFlagsInputAndInputDir(t *testing.T) {
 func TestValidateFlagsOutputAndOutputDir(t *testing.T) {
 	app := NewApp()
 	args := []string{"", "--datasource", "ds.yaml", "--engine", "gotemplates",
-		"--output", "output.txt", "--output-dir", "output_dir",
+		"--input", "file.txt", "--output", "output.txt", "--output-dir", "output_dir",
 	}
 	err := app.Run(args)
 	require.Error(t, err)
@@ -49,7 +69,7 @@ func TestValidateFlagsOutputAndOutputDir(t *testing.T) {
 func TestValidateFlagsInputDirAndOutputDir(t *testing.T) {
 	app := NewApp()
 	args := []string{"", "--datasource", "ds.yaml", "--engine", "gotemplates",
-		"--input-dir", "input_dir", "--output-dir", "",
+		"--input-dir", "input_dir", "--output", "output.txt",
 	}
 	err := app.Run(args)
 	require.Error(t, err)

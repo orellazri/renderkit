@@ -7,6 +7,14 @@ import (
 )
 
 func (a *App) validateFlags(cCtx *cli.Context) error {
+	if len(cCtx.StringSlice("input")) == 0 && len(cCtx.String("input-dir")) == 0 {
+		return fmt.Errorf("either input or input-dir is required")
+	}
+
+	if len(cCtx.String("output")) == 0 && len(cCtx.String("output-dir")) == 0 {
+		return fmt.Errorf("either output or output-dir is required")
+	}
+
 	if len(cCtx.StringSlice("input")) > 0 && len(cCtx.String("input-dir")) > 0 {
 		return fmt.Errorf("the flags \"input\" and \"input-dir\" are mutually exclusive")
 	}
