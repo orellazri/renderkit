@@ -9,17 +9,8 @@ import (
 	"github.com/urfave/cli/v2/altsrc"
 )
 
-type Mode int
-
-const (
-	ModeFileToFile Mode = iota
-	ModeFilesToDir
-	ModeDirToDir
-)
-
 type App struct {
 	cliApp *cli.App
-	mode   Mode
 	engine engines.Engine
 }
 
@@ -39,23 +30,15 @@ func NewApp() *App {
 			Aliases: []string{"c"},
 			Usage:   "Load configuration from YAML file",
 		},
-		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
+		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "input",
 			Aliases: []string{"i"},
-			Usage:   "The input file to render",
+			Usage:   "The input glob to render",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "output",
 			Aliases: []string{"o"},
-			Usage:   "The output file to write to",
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:  "input-dir",
-			Usage: "The input directory to render",
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:  "output-dir",
-			Usage: "The output directory to write to",
+			Usage:   "The output directory to write to",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "datasource",
@@ -98,10 +81,8 @@ func (a *App) Run(args []string) error {
 
 func (a *App) run(cCtx *cli.Context) error {
 	if err := a.validateFlags(
-		cCtx.StringSlice("input"),
-		cCtx.String("input-dir"),
+		cCtx.String("input"),
 		cCtx.String("output"),
-		cCtx.String("output-dir"),
 		cCtx.StringSlice("datasource"),
 		cCtx.String("engine"),
 	); err != nil {
@@ -109,10 +90,6 @@ func (a *App) run(cCtx *cli.Context) error {
 			return fmt.Errorf("show app help: %s", err)
 		}
 		return fmt.Errorf("validate flags: %s", err)
-	}
-
-	if err := a.setMode(cCtx.StringSlice("input"), cCtx.String("input-dir")); err != nil {
-		return fmt.Errorf("set mode: %s", err)
 	}
 
 	if err := a.setEngine(cCtx.String("engine")); err != nil {
@@ -129,11 +106,14 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("load datasources: %s", err)
 	}
 
+	inputFiles, err := a.compileGlob(cCtx.String("input"))
+	if err != nil {
+		return fmt.Errorf("compile input glob: %s", err)
+	}
+
 	if err := a.render(
-		cCtx.StringSlice("input"),
+		inputFiles,
 		cCtx.String("output"),
-		cCtx.String("input-dir"),
-		cCtx.String("output-dir"),
 		data,
 	); err != nil {
 		return fmt.Errorf("render: %s", err)

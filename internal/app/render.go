@@ -6,52 +6,14 @@ import (
 	"path/filepath"
 )
 
-func (a *App) render(input []string, output, inputDir, outputDir string, data map[string]any) error {
-	switch a.mode {
-	case ModeFileToFile:
-		return a.renderFileToFile(input[0], output, data)
-	case ModeFilesToDir:
-		return a.renderFilesToDir(input, outputDir, data)
-	case ModeDirToDir:
-		return a.renderDirToDir(inputDir, outputDir, data)
-	}
-
-	return nil
-}
-
-func (a *App) renderFileToFile(input string, output string, data map[string]any) error {
-	return a.renderFile(input, output, data)
-}
-
-func (a *App) renderFilesToDir(input []string, outputDir string, data map[string]any) error {
+func (a *App) render(inputFiles []string, outputDir string, data map[string]any) error {
 	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
 		return fmt.Errorf("create output directory %s: %s", outputDir, err)
 	}
 
-	for _, inFilename := range input {
-		outFilename := filepath.Join(outputDir, filepath.Base(inFilename))
-		if err := a.renderFile(inFilename, outFilename, data); err != nil {
-			return fmt.Errorf("render file: %s", err)
-		}
-	}
-
-	return nil
-}
-
-func (a *App) renderDirToDir(inputDir, outputDir string, data map[string]any) error {
-	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
-		return fmt.Errorf("create output directory %s: %s", outputDir, err)
-	}
-
-	entries, err := os.ReadDir(inputDir)
-	if err != nil {
-		return fmt.Errorf("read input directory %s: %s", inputDir, err)
-	}
-
-	for _, entry := range entries {
-		inFilename := filepath.Join(inputDir, entry.Name())
-		outFilename := filepath.Join(outputDir, entry.Name())
-		if err := a.renderFile(inFilename, outFilename, data); err != nil {
+	for _, inputFilename := range inputFiles {
+		outFilename := filepath.Join(outputDir, filepath.Base(inputFilename))
+		if err := a.renderFile(inputFilename, outFilename, data); err != nil {
 			return fmt.Errorf("render file: %s", err)
 		}
 	}

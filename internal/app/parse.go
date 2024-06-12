@@ -1,12 +1,12 @@
 package app
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
 	"strings"
 
+	"github.com/goreleaser/fileglob"
 	"github.com/orellazri/renderkit/internal/datasources"
 	"github.com/orellazri/renderkit/internal/engines"
 )
@@ -84,20 +84,6 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, err
 	}
 }
 
-func (a *App) setMode(input []string, inputDir string) error {
-	if len(input) == 1 {
-		a.mode = ModeFileToFile
-	} else if len(input) > 1 {
-		a.mode = ModeFilesToDir
-	} else if len(inputDir) > 0 {
-		a.mode = ModeDirToDir
-	} else {
-		return errors.New("unsupported mode")
-	}
-
-	return nil
-}
-
 func (a *App) setEngine(engineStr string) error {
 	e, ok := enginesMap[engineStr]
 	if !ok {
@@ -106,4 +92,13 @@ func (a *App) setEngine(engineStr string) error {
 	a.engine = e
 
 	return nil
+}
+
+func (a *App) compileGlob(pattern string) ([]string, error) {
+	matches, err := fileglob.Glob(pattern, fileglob.MaybeRootFS)
+	if err != nil {
+		return nil, fmt.Errorf("glob %q: %s", pattern, err)
+	}
+
+	return matches, nil
 }

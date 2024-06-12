@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -57,25 +58,6 @@ func TestParseDatasourceUrls(t *testing.T) {
 	require.Equal(t, expectedUrls, urls)
 }
 
-func TestSetMode(t *testing.T) {
-	app := &App{}
-
-	err := app.setMode([]string{"file1"}, "")
-	require.NoError(t, err)
-	require.Equal(t, ModeFileToFile, app.mode)
-
-	err = app.setMode([]string{"file1", "file2"}, "")
-	require.NoError(t, err)
-	require.Equal(t, ModeFilesToDir, app.mode)
-
-	err = app.setMode([]string{}, "dir1")
-	require.NoError(t, err)
-	require.Equal(t, ModeDirToDir, app.mode)
-
-	err = app.setMode([]string{}, "")
-	require.Error(t, err)
-}
-
 func TestSetEngine(t *testing.T) {
 	app := &App{}
 
@@ -113,4 +95,37 @@ func TestLoadDatasources(t *testing.T) {
 	data, err := a.loadDatasources(datasourceUrls, false)
 	require.NoError(t, err)
 	require.Equal(t, expectedData, data)
+}
+
+func TestCompileInputGlob(t *testing.T) {
+	app := &App{}
+
+	tmpDir := t.TempDir()
+	_, err := os.Create(filepath.Join(tmpDir, "input.txt"))
+	require.NoError(t, err)
+
+	files, err := app.compileGlob(fmt.Sprintf("%s/*.txt", tmpDir))
+	require.NoError(t, err)
+	require.Equal(t, []string{filepath.Join(tmpDir, "input.txt")}, files)
+
+	files, err = app.compileGlob(fmt.Sprintf("%s/*", tmpDir))
+	require.NoError(t, err)
+	require.Equal(t, []string{filepath.Join(tmpDir, "input.txt")}, files)
+
+	files, err = app.compileGlob(fmt.Sprintf("%s/**", tmpDir))
+	require.NoError(t, err)
+	require.Equal(t, []string{filepath.Join(tmpDir, "input.txt")}, files)
+
+	tmpSubdir := filepath.Join(tmpDir, "subdir")
+	err = os.Mkdir(tmpSubdir, 0755)
+	require.NoError(t, err)
+	_, err = os.Create(filepath.Join(tmpSubdir, "input2.txt"))
+	require.NoError(t, err)
+
+	files, err = app.compileGlob(fmt.Sprintf("%s/**", tmpDir))
+	require.NoError(t, err)
+	require.ElementsMatch(t, []string{
+		filepath.Join(tmpDir, "input.txt"),
+		filepath.Join(tmpSubdir, "input2.txt"),
+	}, files)
 }
