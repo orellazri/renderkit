@@ -105,8 +105,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		cCtx.StringSlice("datasource"),
 		cCtx.String("engine"),
 	); err != nil {
-		err := cli.ShowAppHelp(cCtx)
-		if err != nil {
+		if err := cli.ShowAppHelp(cCtx); err != nil {
 			return fmt.Errorf("show app help: %s", err)
 		}
 		return fmt.Errorf("validate flags: %s", err)
