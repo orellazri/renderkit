@@ -2,7 +2,6 @@ package datasources
 
 import (
 	"bytes"
-	"io"
 	"os"
 	"strings"
 	"testing"
@@ -11,12 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestEnvLoad(t *testing.T) {
+func TestEnvLoadFromEnvironment(t *testing.T) {
 	var expectedData = map[string]any{}
-	var r io.Reader
-
-	// Test environment variables from OS
-	r = bytes.NewReader([]byte(strings.Join(os.Environ(), "\n")))
+	r := bytes.NewReader([]byte(strings.Join(os.Environ(), "\n")))
 	env, err := envparse.Parse(r)
 	require.NoError(t, err)
 	for k, v := range env {
@@ -27,12 +23,13 @@ func TestEnvLoad(t *testing.T) {
 	data, err := ds.Load()
 	require.NoError(t, err)
 	require.Equal(t, expectedData, data)
+}
 
-	// Test environment variables from file
-	clear(expectedData)
+func TestEnvLoadFromFile(t *testing.T) {
+	var expectedData = map[string]any{}
 	envVars := []string{"key1=value1", "key2=5"}
-	r = bytes.NewReader([]byte(strings.Join(envVars, "\n")))
-	env, err = envparse.Parse(r)
+	r := bytes.NewReader([]byte(strings.Join(envVars, "\n")))
+	env, err := envparse.Parse(r)
 	require.NoError(t, err)
 	for k, v := range env {
 		expectedData[k] = v
@@ -46,8 +43,8 @@ key1=value1
 key2=5`)
 	require.NoError(t, err)
 
-	ds = NewEnvDatasource(file.Name())
-	data, err = ds.Load()
+	ds := NewEnvDatasource(file.Name())
+	data, err := ds.Load()
 	require.NoError(t, err)
 	require.Equal(t, expectedData, data)
 }
