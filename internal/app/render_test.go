@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/orellazri/renderkit/internal/engine"
+	"github.com/orellazri/renderkit/internal/engines"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +18,7 @@ func TestRenderFileToFile(t *testing.T) {
 	require.NoError(t, err)
 
 	app := &App{
-		engine: &engine.GoTemplatesEngine{},
+		engine: &engines.GoTemplatesEngine{},
 	}
 	err = app.renderFileToFile(inputFile, outputFile, map[string]any{
 		"Name": "John",
@@ -42,7 +42,7 @@ func TestRenderFilesToDir(t *testing.T) {
 	outputDir := filepath.Join(dir, "output")
 
 	app := &App{
-		engine: &engine.GoTemplatesEngine{},
+		engine: &engines.GoTemplatesEngine{},
 	}
 	err := app.renderFilesToDir(inputFiles, outputDir, map[string]any{
 		"Name": "John",
@@ -71,7 +71,7 @@ func TestRenderDirToDir(t *testing.T) {
 	require.NoError(t, err)
 
 	app := &App{
-		engine: &engine.GoTemplatesEngine{},
+		engine: &engines.GoTemplatesEngine{},
 	}
 
 	err = app.renderDirToDir(inputDir, outputDir, map[string]any{

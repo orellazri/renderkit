@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/orellazri/renderkit/internal/engine"
+	"github.com/orellazri/renderkit/internal/engines"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
 )
@@ -20,7 +20,7 @@ const (
 type App struct {
 	cliApp *cli.App
 	mode   Mode
-	engine engine.Engine
+	engine engines.Engine
 }
 
 func NewApp() *App {

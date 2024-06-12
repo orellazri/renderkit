@@ -7,16 +7,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/orellazri/renderkit/internal/datasource"
-	"github.com/orellazri/renderkit/internal/engine"
+	"github.com/orellazri/renderkit/internal/datasources"
+	"github.com/orellazri/renderkit/internal/engines"
 )
 
-var enginesMap = map[string]engine.Engine{
-	"gotemplates": &engine.GoTemplatesEngine{},
-	"jinja":       &engine.JinjaEngine{},
-	"handlebars":  &engine.HandlebarsEngine{},
-	"mustache":    &engine.MustacheEngine{},
-	"jet":         &engine.JetEngine{},
+var enginesMap = map[string]engines.Engine{
+	"gotemplates": &engines.GoTemplatesEngine{},
+	"jinja":       &engines.JinjaEngine{},
+	"handlebars":  &engines.HandlebarsEngine{},
+	"mustache":    &engines.MustacheEngine{},
+	"jet":         &engines.JetEngine{},
 }
 
 func (a *App) parseDatasourceUrls(datasources []string) ([]*url.URL, error) {
@@ -62,14 +62,14 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 	return data, nil
 }
 
-func (a *App) createDatasourceFromURL(url *url.URL) (datasource.Datasource, error) {
+func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, error) {
 	switch url.Scheme {
 	case "":
 		switch filepath.Ext(url.Path) {
 		case ".yaml", ".yml":
-			return datasource.NewYamlDatasource(url.Path), nil
+			return datasources.NewYamlDatasource(url.Path), nil
 		case ".json":
-			return datasource.NewJsonDatasource(url.Path), nil
+			return datasources.NewJsonDatasource(url.Path), nil
 		default:
 			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(url.Path))
 		}

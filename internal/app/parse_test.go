@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/orellazri/renderkit/internal/datasource"
+	"github.com/orellazri/renderkit/internal/datasources"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +16,7 @@ func TestCreateYamlDatasourceFromURL(t *testing.T) {
 	require.NoError(t, err)
 	ds, err := a.createDatasourceFromURL(url)
 	require.NoError(t, err)
-	require.IsType(t, &datasource.YamlDatasource{}, ds)
+	require.IsType(t, &datasources.YamlDatasource{}, ds)
 }
 
 func TestCreateJsonDatasourceFromURL(t *testing.T) {
@@ -25,7 +25,7 @@ func TestCreateJsonDatasourceFromURL(t *testing.T) {
 	require.NoError(t, err)
 	ds, err := a.createDatasourceFromURL(url)
 	require.NoError(t, err)
-	require.IsType(t, &datasource.JsonDatasource{}, ds)
+	require.IsType(t, &datasources.JsonDatasource{}, ds)
 }
 
 func TestCreateInvalidDatasourceFromURL(t *testing.T) {

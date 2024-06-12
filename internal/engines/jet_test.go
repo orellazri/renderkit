@@ -1,14 +1,15 @@
-package engine
+package engines
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestHandlebarsRender(t *testing.T) {
+func TestRender(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -16,7 +17,7 @@ func TestHandlebarsRender(t *testing.T) {
 	_, err = file.WriteString("Hello, {{ Name }}! You are {{ Age }} years old.")
 	require.NoError(t, err)
 
-	engine := &HandlebarsEngine{}
+	engine := &JetEngine{}
 	writer := &bytes.Buffer{}
 	err = engine.Render(file.Name(), writer, map[string]any{
 		"Name": "John",
@@ -26,22 +27,31 @@ func TestHandlebarsRender(t *testing.T) {
 	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }
 
-func TestHandlebarsRenderAdvanced(t *testing.T) {
+func TestRenderWithExtends(t *testing.T) {
 	dir := t.TempDir()
-	file, err := os.CreateTemp(dir, "test.txt")
+	baseFile, err := os.CreateTemp(dir, "base.txt")
+	require.NoError(t, err)
+	_, err = baseFile.WriteString(`
+Contents:
+{{ block contents() }}{{ end }}`)
 	require.NoError(t, err)
 
-	_, err = file.WriteString(`
-{{#names}}Hi {{.}}<br>{{/names}}`)
+	childFile, err := os.CreateTemp(dir, "child.txt")
+	require.NoError(t, err)
+	_, err = childFile.WriteString(fmt.Sprintf(`
+{{ extends %q }}
+{{ block contents() }}
+File contents are here
+{{ end }}`, baseFile.Name()))
 	require.NoError(t, err)
 
-	engine := &HandlebarsEngine{}
+	engine := &JetEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
-		"names": []string{"John", "Doe"},
-	})
-
+	err = engine.Render(childFile.Name(), writer, nil)
 	require.NoError(t, err)
 	require.Equal(t, `
-Hi John<br>Hi Doe<br>`, writer.String())
+Contents:
+
+File contents are here
+`, writer.String())
 }

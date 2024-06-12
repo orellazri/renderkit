@@ -1,4 +1,4 @@
-package engine
+package engines
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMustacheRender(t *testing.T) {
+func TestJinjaRender(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -16,7 +16,7 @@ func TestMustacheRender(t *testing.T) {
 	_, err = file.WriteString("Hello, {{ Name }}! You are {{ Age }} years old.")
 	require.NoError(t, err)
 
-	engine := &MustacheEngine{}
+	engine := &JinjaEngine{}
 	writer := &bytes.Buffer{}
 	err = engine.Render(file.Name(), writer, map[string]any{
 		"Name": "John",
@@ -26,22 +26,28 @@ func TestMustacheRender(t *testing.T) {
 	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }
 
-func TestMustacheRenderAdvanced(t *testing.T) {
+func TestJinjaRenderAdvanced(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
 
 	_, err = file.WriteString(`
-{{#names}}Hi {{.}}<br>{{/names}}`)
+{% macro foo(v) -%}
+	Version is: {{ v }}
+{%- endmacro %}
+
+{{ foo(version) }}`)
 	require.NoError(t, err)
 
-	engine := &MustacheEngine{}
+	engine := &JinjaEngine{}
 	writer := &bytes.Buffer{}
 	err = engine.Render(file.Name(), writer, map[string]any{
-		"names": []string{"John", "Doe"},
+		"version": "1.2.3",
 	})
 
 	require.NoError(t, err)
 	require.Equal(t, `
-Hi John<br>Hi Doe<br>`, writer.String())
+
+
+Version is: 1.2.3`, writer.String())
 }
