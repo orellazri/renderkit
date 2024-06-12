@@ -97,7 +97,14 @@ func (a *App) Run(args []string) error {
 }
 
 func (a *App) run(cCtx *cli.Context) error {
-	if err := a.validateFlags(cCtx); err != nil {
+	if err := a.validateFlags(
+		cCtx.StringSlice("input"),
+		cCtx.String("input-dir"),
+		cCtx.String("output"),
+		cCtx.String("output-dir"),
+		cCtx.StringSlice("datasource"),
+		cCtx.String("engine"),
+	); err != nil {
 		return fmt.Errorf("validate flags: %s", err)
 	}
 
