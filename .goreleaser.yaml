@@ -31,6 +31,10 @@ archives:
       - goos: windows
         format: zip
 
+dockers:
+  - image_templates:
+      - reaperberri/renderkit
+
 changelog:
   sort: asc
   filters:
