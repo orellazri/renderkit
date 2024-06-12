@@ -30,7 +30,7 @@ func TestValidateFlagsNoDatasource(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "datasource is required")
+	require.ErrorIs(t, err, ErrDatasourceRequired)
 }
 
 func TestValidateFlagsNoEngine(t *testing.T) {
@@ -44,7 +44,7 @@ func TestValidateFlagsNoEngine(t *testing.T) {
 		"",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "engine is required")
+	require.ErrorIs(t, err, ErrEngineRequired)
 }
 
 func TestValidateFlagsNoInput(t *testing.T) {
@@ -58,7 +58,7 @@ func TestValidateFlagsNoInput(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "either input or input-dir is required")
+	require.ErrorIs(t, err, ErrNoInput)
 }
 
 func TestValidateFlagsNoOutput(t *testing.T) {
@@ -72,7 +72,7 @@ func TestValidateFlagsNoOutput(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "either output or output-dir is required")
+	require.ErrorIs(t, err, ErrNoOuput)
 }
 
 func TestValidateFlagsInputAndInputDir(t *testing.T) {
@@ -86,7 +86,7 @@ func TestValidateFlagsInputAndInputDir(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "the flags \"input\" and \"input-dir\" are mutually exclusive")
+	require.ErrorIs(t, err, ErrInputExclusive)
 }
 
 func TestValidateFlagsOutputAndOutputDir(t *testing.T) {
@@ -100,7 +100,7 @@ func TestValidateFlagsOutputAndOutputDir(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "the flags \"output\" and \"output-dir\" are mutually exclusive")
+	require.ErrorIs(t, err, ErrOutputExclusive)
 }
 
 func TestValidateFlagsInputDirAndOutputDir(t *testing.T) {
@@ -114,7 +114,7 @@ func TestValidateFlagsInputDirAndOutputDir(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "if input-dir is present, output-dir must be present")
+	require.ErrorIs(t, err, ErrInputDirWithoutOutputDir)
 }
 
 func TestValidateFlagsInputAndOutputDir(t *testing.T) {
@@ -128,7 +128,7 @@ func TestValidateFlagsInputAndOutputDir(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "if input has one file, output-dir must not be present")
+	require.ErrorIs(t, err, ErrInputFileWithOutputDir)
 }
 
 func TestValidateFlagsMultipleInputsAndOutput(t *testing.T) {
@@ -142,5 +142,5 @@ func TestValidateFlagsMultipleInputsAndOutput(t *testing.T) {
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "if multiple inputs are present, output must not be present")
+	require.ErrorIs(t, err, ErrMultipleInputsWithOutput)
 }

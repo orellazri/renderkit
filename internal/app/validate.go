@@ -1,7 +1,17 @@
 package app
 
-import (
-	"fmt"
+import "errors"
+
+var (
+	ErrNoInput                  = errors.New("either input or input-dir is required")
+	ErrNoOuput                  = errors.New("either output or output-dir is required")
+	ErrInputExclusive           = errors.New("the flags \"input\" and \"input-dir\" are mutually exclusive")
+	ErrOutputExclusive          = errors.New("the flags \"output\" and \"output-dir\" are mutually exclusive")
+	ErrInputDirWithoutOutputDir = errors.New("if input-dir is present, output-dir must be present")
+	ErrInputFileWithOutputDir   = errors.New("if input has one file, output-dir must not be present")
+	ErrMultipleInputsWithOutput = errors.New("if multiple inputs are present, output must not be present")
+	ErrDatasourceRequired       = errors.New("datasource is required")
+	ErrEngineRequired           = errors.New("engine is required")
 )
 
 func (a *App) validateFlags(
@@ -13,39 +23,39 @@ func (a *App) validateFlags(
 	engine string,
 ) error {
 	if len(input) == 0 && len(inputDir) == 0 {
-		return fmt.Errorf("either input or input-dir is required")
+		return ErrNoInput
 	}
 
 	if len(output) == 0 && len(outputDir) == 0 {
-		return fmt.Errorf("either output or output-dir is required")
+		return ErrNoOuput
 	}
 
 	if len(input) > 0 && len(inputDir) > 0 {
-		return fmt.Errorf("the flags \"input\" and \"input-dir\" are mutually exclusive")
+		return ErrInputExclusive
 	}
 
 	if len(output) > 0 && len(outputDir) > 0 {
-		return fmt.Errorf("the flags \"output\" and \"output-dir\" are mutually exclusive")
+		return ErrOutputExclusive
 	}
 
 	if len(inputDir) > 0 && len(outputDir) == 0 {
-		return fmt.Errorf("if input-dir is present, output-dir must be present")
+		return ErrInputDirWithoutOutputDir
 	}
 
 	if len(input) == 1 && len(outputDir) > 0 {
-		return fmt.Errorf("if input has one file, output-dir must not be present")
+		return ErrInputFileWithOutputDir
 	}
 
 	if len(input) > 1 && len(output) > 0 {
-		return fmt.Errorf("if multiple inputs are present, output must not be present")
+		return ErrMultipleInputsWithOutput
 	}
 
 	if len(datasource) == 0 {
-		return fmt.Errorf("datasource is required")
+		return ErrDatasourceRequired
 	}
 
 	if len(engine) == 0 {
-		return fmt.Errorf("engine is required")
+		return ErrEngineRequired
 	}
 
 	return nil
