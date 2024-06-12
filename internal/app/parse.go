@@ -63,7 +63,6 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 }
 
 func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, error) {
-	fmt.Println(">>>>>>>URL scheme", url.Scheme)
 	switch url.Scheme {
 	case "":
 		switch filepath.Ext(url.Path) {
