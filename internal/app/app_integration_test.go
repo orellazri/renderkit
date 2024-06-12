@@ -13,17 +13,6 @@ func TestIntegration(t *testing.T) {
 		t.Skip("skipping integration test")
 	}
 
-	// Create input files
-	inputDir := t.TempDir()
-	inputFile1, err := os.Create(filepath.Join(inputDir, "file1.txt"))
-	require.NoError(t, err)
-	_, err = inputFile1.WriteString(`Hello, my name is {{ .Name }}. I am {{ .Age }} years old.`)
-	require.NoError(t, err)
-	inputFile2, err := os.Create(filepath.Join(inputDir, "file2.txt"))
-	require.NoError(t, err)
-	_, err = inputFile2.WriteString(`I like {{ .Hobby }}.`)
-	require.NoError(t, err)
-
 	// Create output directory
 	outputDir := t.TempDir()
 
@@ -31,35 +20,46 @@ func TestIntegration(t *testing.T) {
 	datasourceDir := t.TempDir()
 	datasource1File, err := os.Create(filepath.Join(datasourceDir, "ds.yaml"))
 	require.NoError(t, err)
-	_, err = datasource1File.WriteString(`
-Name: John
-Age: 30`)
+	_, err = datasource1File.WriteString("Name: John")
 	require.NoError(t, err)
 	datasource2File, err := os.Create(filepath.Join(datasourceDir, "ds2.json"))
 	require.NoError(t, err)
-	_, err = datasource2File.WriteString(`{"Hobby": "swimming"}`)
+	_, err = datasource2File.WriteString(`{"Age": 31.5}`)
 	require.NoError(t, err)
 
-	// Run the app
-	app := NewApp()
-	err = app.Run([]string{
-		"",
-		"--input-dir", inputDir,
-		"--output-dir", outputDir,
-		"--datasource", datasource1File.Name(),
-		"--datasource", datasource2File.Name(),
-		"--engine", "gotemplates",
-	})
-	require.NoError(t, err)
+	// Define the input syntax for each engine
+	inputSyntax := map[string]string{
+		"gotemplates": `Hello, my name is {{ .Name }}. I am {{ .Age }} years old.`,
+		"jinja":       `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
+		"handlebars":  `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
+		"mustache":    `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
+		"jet":         `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
+	}
+	require.Equal(t, len(enginesMap), len(inputSyntax), "all engines must be tested")
 
-	// Check the output files
-	outputFile1 := filepath.Join(outputDir, "file1.txt")
-	outputContent1, err := os.ReadFile(outputFile1)
-	require.NoError(t, err)
-	require.Equal(t, "Hello, my name is John. I am 30 years old.", string(outputContent1))
+	for engine, syntax := range inputSyntax {
+		inputDir := t.TempDir()
+		inputFile, err := os.Create(filepath.Join(inputDir, "file.txt"))
+		require.NoError(t, err)
+		_, err = inputFile.WriteString(syntax)
+		require.NoError(t, err)
 
-	outputFile2 := filepath.Join(outputDir, "file2.txt")
-	outputContent2, err := os.ReadFile(outputFile2)
-	require.NoError(t, err)
-	require.Equal(t, "I like swimming.", string(outputContent2))
+		// Run the app for each engine
+		app := NewApp()
+		err = app.Run([]string{
+			"",
+			"--input-dir", inputDir,
+			"--output-dir", outputDir,
+			"--datasource", datasource1File.Name(),
+			"--datasource", datasource2File.Name(),
+			"--engine", engine,
+		})
+		require.NoError(t, err)
+
+		// Check the output files
+		outputFile1 := filepath.Join(outputDir, "file.txt")
+		outputContent1, err := os.ReadFile(outputFile1)
+		require.NoError(t, err)
+		require.Equal(t, "Hello, my name is John. I am 31.5 years old.", string(outputContent1))
+	}
 }
