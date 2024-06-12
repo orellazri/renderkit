@@ -27,7 +27,7 @@
 
 ## Usage
 
-Download the latest release from the [releases page](https://github.com/orellazri/renderkit/releases).
+Download the latest release from the [releases page](https://github.com/orellazri/renderkit/releases) or use the `reaperberri/renderkit` Docker image.
 
 Run the `renderkit` command with the following arguments as either command-line flags, or as a YAML configuration file passed with `--config`.
 
