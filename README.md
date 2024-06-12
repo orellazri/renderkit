@@ -21,6 +21,7 @@
 
 ### Supported Datasources
 
+- Environment variables
 - YAML
 - JSON
 - TOML

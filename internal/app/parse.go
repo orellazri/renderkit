@@ -73,6 +73,12 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, err
 		default:
 			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(url.Path))
 		}
+	case "env":
+		path := ""
+		if url.Host != "" {
+			path = strings.TrimPrefix(url.String(), fmt.Sprintf("%s://", url.Scheme))
+		}
+		return datasources.NewEnvDatasource(path), nil
 	default:
 		return nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
 	}
