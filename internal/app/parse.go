@@ -35,7 +35,6 @@ func (a *App) parseDatasourceUrls(datasources []string) ([]*url.URL, error) {
 func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool) (map[string]any, error) {
 	duplicateKeys := []string{} // We keep track of duplicate keys to return a more informative error message
 	data := make(map[string]any)
-	// Load datasources
 	for _, url := range datasourceUrls {
 		ds, err := a.createDatasourceFromURL(url)
 		if err != nil {
@@ -64,6 +63,7 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool
 }
 
 func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, error) {
+	fmt.Println(">>>>>>>URL scheme", url.Scheme)
 	switch url.Scheme {
 	case "":
 		switch filepath.Ext(url.Path) {
@@ -75,11 +75,11 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, err
 			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(url.Path))
 		}
 	case "env":
-		if url.Path != "" {
-			path := strings.TrimPrefix(url.String(), fmt.Sprintf("%s://", url.Scheme))
-			return datasource.NewEnvDatasource(path), nil
+		path := ""
+		if url.Host != "" {
+			path = strings.TrimPrefix(url.String(), fmt.Sprintf("%s://", url.Scheme))
 		}
-		return datasource.NewEnvDatasource(url.Path), nil
+		return datasources.NewEnvDatasource(path), nil
 	default:
 		return nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
 	}

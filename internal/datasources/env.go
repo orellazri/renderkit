@@ -1,10 +1,12 @@
-package datasource
+package datasources
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/hashicorp/go-envparse"
 )
 
 type EnvDatasource struct {
@@ -18,10 +20,13 @@ func NewEnvDatasource(filepath string) *EnvDatasource {
 func (ds *EnvDatasource) Load() (map[string]any, error) {
 	data := make(map[string]any)
 	if ds.filepath == "" {
-		envVars := os.Environ()
-		for _, envVar := range envVars {
-			envVar := strings.Split(envVar, "=")
-			data[envVar[0]] = envVar[1]
+		r := bytes.NewReader([]byte(strings.Join(os.Environ(), "\n")))
+		env, err := envparse.Parse(r)
+		if err != nil {
+			return nil, fmt.Errorf("parse environment variables: %s", err)
+		}
+		for k, v := range env {
+			data[k] = v
 		}
 	} else {
 		f, err := os.Open(ds.filepath)
@@ -29,13 +34,13 @@ func (ds *EnvDatasource) Load() (map[string]any, error) {
 			return nil, err
 		}
 		defer f.Close()
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			envVar := strings.Split(scanner.Text(), "=")
-			if len(envVar) != 2 {
-				return nil, fmt.Errorf("invalid env var %q in file %s", scanner.Text(), f.Name())
-			}
-			data[envVar[0]] = envVar[1]
+
+		env, err := envparse.Parse(f)
+		if err != nil {
+			return nil, fmt.Errorf("parse environment variables from file %s: %s", ds.filepath, err)
+		}
+		for k, v := range env {
+			data[k] = v
 		}
 	}
 	return data, nil
