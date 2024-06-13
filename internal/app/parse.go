@@ -112,6 +112,24 @@ func (a *App) compileGlob(pattern string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("glob %q: %s", pattern, err)
 	}
+	if len(excludePattern) > 0 {
+		var exclusionMap = make(map[string]bool)
+		var uniqueMatches []string
+
+		excludeMatches, err := fileglob.Glob(excludePattern, fileglob.MaybeRootFS)
+		if err != nil {
+			return nil, fmt.Errorf("exclude glob %q: %s", excludePattern, err)
+		}
+		for _, v := range excludeMatches {
+			exclusionMap[v] = true
+		}
+		for _, v := range matches {
+			if _, ok := exclusionMap[v]; !ok {
+				uniqueMatches = append(uniqueMatches, v)
+			}
+		}
+		return uniqueMatches, nil
+	}
 
 	return matches, nil
 }
