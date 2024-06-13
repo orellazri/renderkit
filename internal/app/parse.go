@@ -120,3 +120,15 @@ func (a *App) excludeFilesFromInput(inputFiles []string, excludeFiles []string) 
 	}
 	return filtered
 }
+
+func (a *App) aggregateExcludeFiles(excludeFiles []string) ([]string, error) {
+	var aggregatedExcludeFiles []string
+	for _, excludeGlob := range excludeFiles {
+		excludeFiles, err := a.compileGlob(excludeGlob)
+		if err != nil {
+			return nil, fmt.Errorf("compile exclude glob: %s", err)
+		}
+		aggregatedExcludeFiles = append(aggregatedExcludeFiles, excludeFiles...)
+	}
+	return aggregatedExcludeFiles, nil
+}

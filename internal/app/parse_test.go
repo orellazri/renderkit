@@ -134,14 +134,10 @@ func TestFilteredInputFiles(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	var aggregatedExcludeFiles []string
-	excludeFilesGlobs := []string{"[1-2].txt", "3*.txt"}
+	excludeFilesGlobs := []string{filepath.Join(tmpDir, "[1-2].txt"), filepath.Join(tmpDir, "3*.txt")}
 
-	for _, pattern := range excludeFilesGlobs {
-		excludeFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, pattern))
-		require.NoError(t, err)
-		aggregatedExcludeFiles = append(aggregatedExcludeFiles, excludeFiles...)
-	}
+	aggregatedExcludeFiles, err := app.aggregateExcludeFiles(excludeFilesGlobs)
+	require.NoError(t, err)
 
 	inputFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, "*.txt"))
 	require.NoError(t, err)

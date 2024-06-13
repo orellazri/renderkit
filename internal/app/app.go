@@ -124,13 +124,9 @@ func (a *App) run(cCtx *cli.Context) error {
 	}
 
 	if len(cCtx.StringSlice("exclude")) > 0 {
-		var aggregatedExcludeFiles []string
-		for _, excludeGlob := range cCtx.StringSlice("exclude") {
-			excludeFiles, err := a.compileGlob(excludeGlob)
-			if err != nil {
-				return fmt.Errorf("compile exclude glob: %s", err)
-			}
-			aggregatedExcludeFiles = append(aggregatedExcludeFiles, excludeFiles...)
+		aggregatedExcludeFiles, err := a.aggregateExcludeFiles(cCtx.StringSlice("exclude"))
+		if err != nil {
+			return fmt.Errorf("aggregate exclude files: %s", err)
 		}
 		inputFiles = a.excludeFilesFromInput(inputFiles, aggregatedExcludeFiles)
 	}
