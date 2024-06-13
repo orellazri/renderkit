@@ -36,6 +36,12 @@ func NewApp() *App {
 			Usage:   "The input glob to render",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "exclude",
+			Aliases:     []string{"x"},
+			Usage:       "The glob pattern for files to exclude from rendering",
+			DefaultText: "",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "output",
 			Aliases: []string{"o"},
 			Usage:   "The output directory to write to",
@@ -113,6 +119,14 @@ func (a *App) run(cCtx *cli.Context) error {
 	inputFiles, err := a.compileGlob(cCtx.String("input"))
 	if err != nil {
 		return fmt.Errorf("compile input glob: %s", err)
+	}
+
+	if len(cCtx.String("exclude")) > 0 {
+		excludeFiles, err := a.compileGlob(cCtx.String("exclude"))
+		if err != nil {
+			return fmt.Errorf("compile exclude glob: %s", err)
+		}
+		inputFiles = a.excludeFilesFromInput(inputFiles, excludeFiles)
 	}
 
 	if err := a.render(

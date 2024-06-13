@@ -115,3 +115,18 @@ func (a *App) compileGlob(pattern string) ([]string, error) {
 
 	return matches, nil
 }
+
+func (a *App) excludeFilesFromInput(inputFiles []string, excludeFiles []string) []string {
+	var excludeMap = make(map[string]bool)
+	var filtered []string
+
+	for _, v := range excludeFiles {
+		excludeMap[v] = true
+	}
+	for _, v := range inputFiles {
+		if _, ok := excludeMap[v]; !ok {
+			filtered = append(filtered, v)
+		}
+	}
+	return filtered
+}
