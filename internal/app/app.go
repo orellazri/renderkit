@@ -126,7 +126,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		if err != nil {
 			return fmt.Errorf("compile exclude glob: %s", err)
 		}
-		inputFiles = a.compileGlobExclusion(inputFiles, excludeFiles)
+		inputFiles = a.excludeFilesFromInput(inputFiles, excludeFiles)
 	}
 
 	if err := a.render(

@@ -116,7 +116,7 @@ func (a *App) compileGlob(pattern string) ([]string, error) {
 	return matches, nil
 }
 
-func (a *App) compileGlobExclusion(inputFiles []string, excludeFiles []string) []string {
+func (a *App) excludeFilesFromInput(inputFiles []string, excludeFiles []string) []string {
 	var excludeMap = make(map[string]bool)
 	var filtered []string
 

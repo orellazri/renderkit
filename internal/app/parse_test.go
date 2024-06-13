@@ -138,7 +138,7 @@ func TestCompileInputInvalidGlob(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestCompileInputGlobWithExclusionGlob(t *testing.T) {
+func TestFilteredInputFiles(t *testing.T) {
 	app := &App{}
 
 	tmpDir := t.TempDir()
@@ -154,19 +154,19 @@ func TestCompileInputGlobWithExclusionGlob(t *testing.T) {
 	require.NoError(t, err)
 	excludeFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, excludeGlob))
 	require.NoError(t, err)
-	inputFiles = app.compileGlobExclusion(inputFiles, excludeFiles)
+	inputFiles = app.excludeFilesFromInput(inputFiles, excludeFiles)
 
 	require.Equal(t, []string{filepath.Join(tmpDir, "3.txt")}, inputFiles)
 }
 
-func TestCompileGlobExclusion(t *testing.T) {
+func TestExcludeFilesFromInput(t *testing.T) {
 	app := &App{}
 
 	expectedData := []string{"3.txt"}
 	inputFiles := []string{"1.txt", "2.txt", "3.txt"}
 	excludeFiles := []string{"1.txt", "2.txt"}
 
-	filteredFiles := app.compileGlobExclusion(inputFiles, excludeFiles)
+	filteredFiles := app.excludeFilesFromInput(inputFiles, excludeFiles)
 
 	require.Equal(t, expectedData, filteredFiles)
 }
