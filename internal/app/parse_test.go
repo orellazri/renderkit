@@ -158,3 +158,15 @@ func TestCompileInputGlobWithExclusionGlob(t *testing.T) {
 
 	require.Equal(t, []string{filepath.Join(tmpDir, "3.txt")}, inputFiles)
 }
+
+func TestCompileGlobExclusion(t *testing.T) {
+	app := &App{}
+
+	expectedData := []string{"3.txt"}
+	inputFiles := []string{"1.txt", "2.txt", "3.txt"}
+	excludeFiles := []string{"1.txt", "2.txt"}
+
+	filteredFiles := app.compileGlobExclusion(inputFiles, excludeFiles)
+
+	require.Equal(t, expectedData, filteredFiles)
+}
