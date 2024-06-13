@@ -137,3 +137,19 @@ func TestCompileInputInvalidGlob(t *testing.T) {
 	_, err := app.compileGlob("[a-z")
 	require.Error(t, err)
 }
+
+func TestCompileInputGlobWithExclusionGlob(t *testing.T) {
+	app := &App{}
+
+	tmpDir := t.TempDir()
+	for _, file := range []string{"1.txt", "2.txt", "3.txt"} {
+		_, err := os.Create(filepath.Join(tmpDir, file))
+		require.NoError(t, err)
+	}
+
+	inputGlob := "*.txt"
+	excludeGlob := "[1-2].txt"
+	files, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, inputGlob), fmt.Sprintf("%s/%s", tmpDir, excludeGlob))
+	require.NoError(t, err)
+	require.Equal(t, []string{filepath.Join(tmpDir, "3.txt")}, files)
+}
