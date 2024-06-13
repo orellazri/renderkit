@@ -116,9 +116,17 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("load datasources: %s", err)
 	}
 
-	inputFiles, err := a.compileGlob(cCtx.String("input"), cCtx.String("exclude"))
+	inputFiles, err := a.compileGlob(cCtx.String("input"))
 	if err != nil {
 		return fmt.Errorf("compile input glob: %s", err)
+	}
+
+	if len(cCtx.String("exclude")) > 0 {
+		excludeFiles, err := a.compileGlob(cCtx.String("exclude"))
+		if err != nil {
+			return fmt.Errorf("compile exclude glob: %s", err)
+		}
+		inputFiles = a.compileGlobExclusion(inputFiles, excludeFiles)
 	}
 
 	if err := a.render(

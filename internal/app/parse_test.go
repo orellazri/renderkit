@@ -106,15 +106,15 @@ func TestCompileInputGlob(t *testing.T) {
 	_, err := os.Create(filepath.Join(tmpDir, "input.txt"))
 	require.NoError(t, err)
 
-	files, err := app.compileGlob(fmt.Sprintf("%s/*.txt", tmpDir), "")
+	files, err := app.compileGlob(fmt.Sprintf("%s/*.txt", tmpDir))
 	require.NoError(t, err)
 	require.Equal(t, []string{filepath.Join(tmpDir, "input.txt")}, files)
 
-	files, err = app.compileGlob(fmt.Sprintf("%s/*", tmpDir), "")
+	files, err = app.compileGlob(fmt.Sprintf("%s/*", tmpDir))
 	require.NoError(t, err)
 	require.Equal(t, []string{filepath.Join(tmpDir, "input.txt")}, files)
 
-	files, err = app.compileGlob(fmt.Sprintf("%s/**", tmpDir), "")
+	files, err = app.compileGlob(fmt.Sprintf("%s/**", tmpDir))
 	require.NoError(t, err)
 	require.Equal(t, []string{filepath.Join(tmpDir, "input.txt")}, files)
 
@@ -124,7 +124,7 @@ func TestCompileInputGlob(t *testing.T) {
 	_, err = os.Create(filepath.Join(tmpSubdir, "input2.txt"))
 	require.NoError(t, err)
 
-	files, err = app.compileGlob(fmt.Sprintf("%s/**", tmpDir), "")
+	files, err = app.compileGlob(fmt.Sprintf("%s/**", tmpDir))
 	require.NoError(t, err)
 	require.ElementsMatch(t, []string{
 		filepath.Join(tmpDir, "input.txt"),
@@ -149,7 +149,12 @@ func TestCompileInputGlobWithExclusionGlob(t *testing.T) {
 
 	inputGlob := "*.txt"
 	excludeGlob := "[1-2].txt"
-	files, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, inputGlob), fmt.Sprintf("%s/%s", tmpDir, excludeGlob))
+
+	inputFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, inputGlob))
 	require.NoError(t, err)
-	require.Equal(t, []string{filepath.Join(tmpDir, "3.txt")}, files)
+	excludeFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, excludeGlob))
+	require.NoError(t, err)
+	inputFiles = app.compileGlobExclusion(inputFiles, excludeFiles)
+
+	require.Equal(t, []string{filepath.Join(tmpDir, "3.txt")}, inputFiles)
 }
