@@ -131,3 +131,9 @@ func TestCompileInputGlob(t *testing.T) {
 		filepath.Join(tmpSubdir, "input2.txt"),
 	}, files)
 }
+
+func TestCompileInputInvalidGlob(t *testing.T) {
+	app := &App{}
+	_, err := app.compileGlob("[a-z")
+	require.Error(t, err)
+}
