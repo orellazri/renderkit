@@ -106,7 +106,7 @@ func (a *App) setEngine(engineStr string) error {
 
 func (a *App) compileGlob(pattern string) ([]string, error) {
 	if err := fileglob.ValidPattern(pattern); err != nil {
-		return nil, fmt.Errorf("invalid glob pattern: %s", err)
+		return nil, fmt.Errorf("invalid glob pattern: %q", err)
 	}
 	matches, err := fileglob.Glob(pattern, fileglob.MaybeRootFS)
 	if err != nil {
