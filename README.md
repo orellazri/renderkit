@@ -38,11 +38,12 @@ Run the `renderkit` command with the following arguments as either command-line 
 | `input`                | The input glob to render                                                       | string |
 | `output`               | The output directory to write to                                               | string |
 | `datasource`           | The datasource to use for rendering (scheme://path)                            | list   |
+| `data`                 | The data to use for rendering. Can be used to provide data directly            | list   |
 | `engine`               | The templating engine to use for rendering                                     | string |
 | `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
 
 ```bash
-renderkit --input in/*.tpl --output output/ --datasource data.yaml --engine jinja
+renderkit --input in/*.tpl --output output/ --datasource data.yaml --data myKey=myValue --engine jinja
 ```
 
 ### Example YAML Configuration File
