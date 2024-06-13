@@ -45,6 +45,10 @@ func NewApp() *App {
 			Aliases: []string{"d"},
 			Usage:   "The datasource to use for rendering (scheme://path)",
 		}),
+		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
+			Name:  "data",
+			Usage: "The data to use for rendering. Can be used to provide data directly",
+		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "engine",
 			Aliases: []string{"e"},
@@ -101,7 +105,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("parse datasource URLs: %s", err)
 	}
 
-	data, err := a.loadDatasources(datasourceUrls, cCtx.Bool("allow-duplicate-keys"))
+	data, err := a.loadDatasources(datasourceUrls, cCtx.StringSlice("data"), cCtx.Bool("allow-duplicate-keys"))
 	if err != nil {
 		return fmt.Errorf("load datasources: %s", err)
 	}

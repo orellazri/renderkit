@@ -32,9 +32,19 @@ func (a *App) parseDatasourceUrls(datasources []string) ([]*url.URL, error) {
 	return datasourceUrls, nil
 }
 
-func (a *App) loadDatasources(datasourceUrls []*url.URL, allowDuplicateKeys bool) (map[string]any, error) {
+func (a *App) loadDatasources(datasourceUrls []*url.URL, extraData []string, allowDuplicateKeys bool) (map[string]any, error) {
 	duplicateKeys := []string{} // We keep track of duplicate keys to return a more informative error message
 	data := make(map[string]any)
+
+	// Load extra data
+	for _, d := range extraData {
+		kv := strings.SplitN(d, "=", 2)
+		if _, ok := data[kv[0]]; ok && !allowDuplicateKeys {
+			duplicateKeys = append(duplicateKeys, kv[0])
+		}
+		data[kv[0]] = kv[1]
+	}
+
 	for _, url := range datasourceUrls {
 		ds, err := a.createDatasourceFromURL(url)
 		if err != nil {

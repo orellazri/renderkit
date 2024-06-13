@@ -82,6 +82,7 @@ func TestLoadDatasources(t *testing.T) {
 	require.NoError(t, err)
 	_, err = ds2File.WriteString(`{"key2": "value2"}`)
 	require.NoError(t, err)
+	extraData := []string{"key3=value3"}
 
 	a := &App{}
 	datasourceUrls := []*url.URL{
@@ -91,8 +92,9 @@ func TestLoadDatasources(t *testing.T) {
 	expectedData := map[string]any{
 		"key1": "value1",
 		"key2": "value2",
+		"key3": "value3",
 	}
-	data, err := a.loadDatasources(datasourceUrls, false)
+	data, err := a.loadDatasources(datasourceUrls, extraData, false)
 	require.NoError(t, err)
 	require.Equal(t, expectedData, data)
 }
