@@ -36,7 +36,7 @@ Run the `renderkit` command with the following arguments as either command-line 
 | ---------------------- | ------------------------------------------------------------------------------ | ------ |
 | `config`               | Load configuration from YAML file                                              | string |
 | `input`                | The input glob to render                                                       | string |
-| `exclude`              | The glob pattern for files to skip during rendering                            | string |
+| `exclude`              | The glob pattern for files to exclude from rendering                           | string |
 | `output`               | The output directory to write to                                               | string |
 | `datasource`           | The datasource to use for rendering (scheme://path)                            | list   |
 | `data`                 | The data to use for rendering. Can be used to provide data directly            | list   |
