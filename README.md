@@ -32,16 +32,16 @@ Download the latest release from the [releases page](https://github.com/orellazr
 
 Run the `renderkit` command with the following arguments as either command-line flags, or as a YAML configuration file passed with `--config`.
 
-| Name                   | Description                                                                    | Type   |
-| ---------------------- | ------------------------------------------------------------------------------ | ------ |
-| `config`               | Load configuration from YAML file                                              | string |
-| `input`                | The input glob to render                                                       | string |
-| `exclude`              | The glob pattern for files to exclude from rendering                           | string |
-| `output`               | The output directory to write to                                               | string |
-| `datasource`           | The datasource to use for rendering (scheme://path)                            | list   |
-| `data`                 | The data to use for rendering. Can be used to provide data directly            | list   |
-| `engine`               | The templating engine to use for rendering                                     | string |
-| `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
+| Name                   | Description                                                                    | Type   | Required |
+| ---------------------- | ------------------------------------------------------------------------------ | ------ | -------- |
+| `config`               | Load configuration from YAML file                                              | string | False    |
+| `input`                | The input glob to render                                                       | string | True     |
+| `exclude`              | The glob pattern for files to exclude from rendering                           | string | False    |
+| `output`               | The output directory to write to                                               | string | True     |
+| `datasource`           | The datasource to use for rendering (scheme://path)                            | list   | True     |
+| `data`                 | The data to use for rendering. Can be used to provide data directly            | list   | False    |
+| `engine`               | The templating engine to use for rendering                                     | string | True     |
+| `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   | False    |
 
 ```bash
 renderkit --input in/*.tpl --output output/ --datasource data.yaml --data myKey=myValue --engine jinja
