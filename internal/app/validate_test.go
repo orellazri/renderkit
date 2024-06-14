@@ -9,6 +9,7 @@ import (
 func TestValidateFlagsNoErrors(t *testing.T) {
 	app := NewApp()
 	err := app.validateFlags(
+		"",
 		"input.txt",
 		"output/",
 		[]string{"ds.yaml"},
@@ -21,6 +22,7 @@ func TestValidateFlagsNoData(t *testing.T) {
 	app := NewApp()
 
 	err := app.validateFlags(
+		"",
 		"input.txt",
 		"output/",
 		nil,
@@ -34,6 +36,7 @@ func TestValidateFlagsNoInput(t *testing.T) {
 	app := NewApp()
 	err := app.validateFlags(
 		"",
+		"",
 		"output/",
 		[]string{"ds.yaml"},
 		nil,
@@ -42,9 +45,23 @@ func TestValidateFlagsNoInput(t *testing.T) {
 	require.ErrorIs(t, err, ErrNoInput)
 }
 
+func TestValidateFlagsInputFileAndDirConflict(t *testing.T) {
+	app := NewApp()
+	err := app.validateFlags(
+		"input/",
+		"input.txt",
+		"output/",
+		[]string{"ds.yaml"},
+		nil,
+	)
+	require.Error(t, err)
+	require.ErrorIs(t, err, ErrInputFileAndDirConflict)
+}
+
 func TestValidateFlagsNoOutput(t *testing.T) {
 	app := NewApp()
 	err := app.validateFlags(
+		"",
 		"input.txt",
 		"",
 		[]string{"ds.yaml"},

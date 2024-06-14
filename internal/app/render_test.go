@@ -10,11 +10,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRender(t *testing.T) {
+func TestRenderDir(t *testing.T) {
 	dir := t.TempDir()
+	inputDir := filepath.Join(dir, "input")
+	err := os.Mkdir(inputDir, os.ModePerm)
+
+	require.NoError(t, err)
 	inputFiles := []string{
-		filepath.Join(dir, "input1.txt"),
-		filepath.Join(dir, "input2.txt"),
+		filepath.Join(inputDir, "input1.txt"),
+		filepath.Join(inputDir, "input2.txt"),
 	}
 	for _, inputFile := range inputFiles {
 		err := os.WriteFile(inputFile, []byte("Hello, {{ .Name }}!"), os.ModePerm)
@@ -25,9 +29,15 @@ func TestRender(t *testing.T) {
 	app := &App{
 		engine: &engines.GoTemplatesEngine{},
 	}
-	err := app.render(inputFiles, outputDir, map[string]any{
-		"Name": "John",
-	})
+	err = app.render(
+		inputDir,
+		"",
+		outputDir,
+		nil,
+		map[string]any{
+			"Name": "John",
+		},
+	)
 	require.NoError(t, err)
 	outputFiles, err := os.ReadDir(outputDir)
 	require.NoError(t, err)
@@ -38,4 +48,65 @@ func TestRender(t *testing.T) {
 		expectedContent := fmt.Sprintf("Hello, %s!", "John")
 		require.Equal(t, expectedContent, string(content))
 	}
+}
+func TestRenderDirWithSubpaths(t *testing.T) {
+	dir := t.TempDir()
+	inputDir := filepath.Join(dir, "input")
+	err := os.Mkdir(inputDir, os.ModePerm)
+	require.NoError(t, err)
+
+	inputSubdir1 := filepath.Join(inputDir, "subdir1")
+	err = os.Mkdir(inputSubdir1, os.ModePerm)
+	require.NoError(t, err)
+	inputSubdir2 := filepath.Join(inputDir, "subdir2")
+	err = os.Mkdir(inputSubdir2, os.ModePerm)
+	require.NoError(t, err)
+
+	inputFiles := []string{
+		filepath.Join(inputSubdir1, "file1.txt"),
+		filepath.Join(inputSubdir2, "file2.txt"),
+	}
+	for _, inputFile := range inputFiles {
+		err := os.WriteFile(inputFile, []byte("Hello!"), os.ModePerm)
+		require.NoError(t, err)
+	}
+
+	outputDir := filepath.Join(dir, "output")
+	app := &App{
+		engine: &engines.GoTemplatesEngine{},
+	}
+
+	err = app.renderDir(inputDir, outputDir, nil, nil)
+	require.NoError(t, err)
+
+	_, err = os.Stat(filepath.Join(outputDir, "subdir1", "file1.txt"))
+	require.NoError(t, err)
+	_, err = os.Stat(filepath.Join(outputDir, "subdir2", "file2.txt"))
+	require.NoError(t, err)
+}
+
+func TestRenderFile(t *testing.T) {
+	dir := t.TempDir()
+	inputFile := filepath.Join(dir, "input.txt")
+	err := os.WriteFile(inputFile, []byte("Hello, {{ .Name }}!"), os.ModePerm)
+	require.NoError(t, err)
+	outputDir := filepath.Join(dir, "output")
+	app := &App{
+		engine: &engines.GoTemplatesEngine{},
+	}
+	err = app.render(
+		"",
+		inputFile,
+		outputDir,
+		nil,
+		map[string]any{
+			"Name": "John",
+		},
+	)
+	require.NoError(t, err)
+	outputFile := filepath.Join(outputDir, filepath.Base(inputFile))
+	content, err := os.ReadFile(outputFile)
+	require.NoError(t, err)
+	expectedContent := fmt.Sprintf("Hello, %s!", "John")
+	require.Equal(t, expectedContent, string(content))
 }

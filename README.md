@@ -35,12 +35,13 @@ Run the `renderkit` command with the following arguments as either command-line 
 | Name                   | Description                                                                    | Type   |
 | ---------------------- | ------------------------------------------------------------------------------ | ------ |
 | `config`               | Load configuration from YAML file                                              | string |
-| `input`                | The input glob to render                                                       | string |
-| `exclude`              | The glob patterns for files to exclude from rendering                          | list   |
-| `output`               | The output directory to write to                                               | string |
-| `datasource`           | The datasource to use for rendering (scheme://path)                            | list   |
-| `data`                 | The data to use for rendering. Can be used to provide data directly            | list   |
-| `engine`               | The templating engine to use for rendering (Go Templates by default)           | string |
+| `input-dir`            | Input directory to render                                                      | string |
+| `file`                 | Input file to render                                                           | string |
+| `exclude`              | Glob patterns for files to exclude from rendering                              | list   |
+| `output`               | Output directory to write to                                                   | string |
+| `datasource`           | Datasource to use for rendering (scheme://path)                                | list   |
+| `data`                 | Data to use for rendering. Can be used to provide data directly                | list   |
+| `engine`               | Templating engine to use for rendering (Go Templates by default)               | string |
 | `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
 
 ```bash
@@ -50,15 +51,15 @@ renderkit --input in/*.tpl --output output/ --datasource data.yaml --data myKey=
 ### Example YAML Configuration File
 
 ```yaml
-input: in/*.tpl
+input-dir: input/
 output: output/
 exclude:
-  - in/exclude[1-2].tpl
-  - in/other_*.tpl
+  - input/exclude[1-2].tpl
+  - input/other_*.tpl
 datasource:
   - data.yaml
   - data2.json
-engine: jinja
+engine: gotemplates
 allow-duplicate-keys: true
 ```
 

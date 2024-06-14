@@ -31,34 +31,39 @@ func NewApp() *App {
 			Usage:   "Load configuration from YAML file",
 		},
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "input",
+			Name:    "input-dir",
 			Aliases: []string{"i"},
-			Usage:   "The input glob to render",
+			Usage:   "Input directory to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "file",
+			Aliases: []string{"f"},
+			Usage:   "Input file to render",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:        "exclude",
 			Aliases:     []string{"x"},
-			Usage:       "The glob pattern for files to exclude from rendering",
+			Usage:       "Glob pattern for files to exclude from rendering",
 			DefaultText: "",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "output",
 			Aliases: []string{"o"},
-			Usage:   "The output directory to write to",
+			Usage:   "Output directory to write to",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "datasource",
 			Aliases: []string{"d"},
-			Usage:   "The datasource to use for rendering (scheme://path)",
+			Usage:   "Datasource to use for rendering (scheme://path)",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:  "data",
-			Usage: "The data to use for rendering. Can be used to provide data directly",
+			Usage: "Data to use for rendering. Can be used to provide data directly",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "engine",
 			Aliases: []string{"e"},
-			Usage:   fmt.Sprintf("The templating engine to use for rendering (%s)", enginesListStr),
+			Usage:   fmt.Sprintf("Templating engine to use for rendering (%s)", enginesListStr),
 			Action: func(cCtx *cli.Context, value string) error {
 				if _, ok := enginesMap[value]; !ok {
 					return fmt.Errorf("engine %s is not supported. supported engines: %s", value, enginesListStr)
@@ -91,7 +96,8 @@ func (a *App) Run(args []string) error {
 
 func (a *App) run(cCtx *cli.Context) error {
 	if err := a.validateFlags(
-		cCtx.String("input"),
+		cCtx.String("input-dir"),
+		cCtx.String("file"),
 		cCtx.String("output"),
 		cCtx.StringSlice("datasource"),
 		cCtx.StringSlice("data"),
@@ -118,22 +124,20 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("load datasources: %s", err)
 	}
 
-	inputFiles, err := a.compileGlob(cCtx.String("input"))
-	if err != nil {
-		return fmt.Errorf("compile input glob: %s", err)
-	}
-
+	aggregatedExcludeFiles := []string{}
 	if len(cCtx.StringSlice("exclude")) > 0 {
-		aggregatedExcludeFiles, err := a.aggregateExcludeFiles(cCtx.StringSlice("exclude"))
+		excludeResult, err := a.aggregateExcludeFiles(cCtx.StringSlice("exclude"))
 		if err != nil {
 			return fmt.Errorf("aggregate exclude files: %s", err)
 		}
-		inputFiles = a.excludeFilesFromInput(inputFiles, aggregatedExcludeFiles)
+		aggregatedExcludeFiles = excludeResult
 	}
 
 	if err := a.render(
-		inputFiles,
+		cCtx.String("input-dir"),
+		cCtx.String("file"),
 		cCtx.String("output"),
+		aggregatedExcludeFiles,
 		data,
 	); err != nil {
 		return fmt.Errorf("render: %s", err)

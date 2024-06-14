@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -49,7 +48,7 @@ func TestIntegration(t *testing.T) {
 		app := NewApp()
 		err = app.Run([]string{
 			"",
-			"--input", fmt.Sprintf("%s/*.txt", inputDir),
+			"--input-dir", inputDir,
 			"--output", outputDir,
 			"--datasource", datasource1File.Name(),
 			"--datasource", datasource2File.Name(),

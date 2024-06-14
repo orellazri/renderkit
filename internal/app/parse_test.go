@@ -86,7 +86,7 @@ func TestLoadDatasources(t *testing.T) {
 	require.Equal(t, expectedData, data)
 }
 
-func TestCompileInputGlob(t *testing.T) {
+func TestCompileGlob(t *testing.T) {
 	app := &App{}
 
 	tmpDir := t.TempDir()
@@ -119,13 +119,13 @@ func TestCompileInputGlob(t *testing.T) {
 	}, files)
 }
 
-func TestCompileInputInvalidGlob(t *testing.T) {
+func TestCompileInvalidGlob(t *testing.T) {
 	app := &App{}
 	_, err := app.compileGlob("[a-z")
 	require.Error(t, err)
 }
 
-func TestFilteredInputFiles(t *testing.T) {
+func TestAggregateExcludeFiles(t *testing.T) {
 	app := &App{}
 
 	tmpDir := t.TempDir()
@@ -139,21 +139,9 @@ func TestFilteredInputFiles(t *testing.T) {
 	aggregatedExcludeFiles, err := app.aggregateExcludeFiles(excludeFilesGlobs)
 	require.NoError(t, err)
 
-	inputFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, "*.txt"))
-	require.NoError(t, err)
-	inputFiles = app.excludeFilesFromInput(inputFiles, aggregatedExcludeFiles)
-
-	require.Equal(t, []string{filepath.Join(tmpDir, "4.txt")}, inputFiles)
-}
-
-func TestExcludeFilesFromInput(t *testing.T) {
-	app := &App{}
-
-	expectedData := []string{"3.txt"}
-	inputFiles := []string{"1.txt", "2.txt", "3.txt"}
-	excludeFiles := []string{"1.txt", "2.txt"}
-
-	filteredFiles := app.excludeFilesFromInput(inputFiles, excludeFiles)
-
-	require.Equal(t, expectedData, filteredFiles)
+	require.ElementsMatch(t, []string{
+		filepath.Join(tmpDir, "1.txt"),
+		filepath.Join(tmpDir, "2.txt"),
+		filepath.Join(tmpDir, "3.txt"),
+	}, aggregatedExcludeFiles)
 }
