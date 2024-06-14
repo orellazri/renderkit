@@ -95,7 +95,6 @@ func (a *App) run(cCtx *cli.Context) error {
 		cCtx.String("output"),
 		cCtx.StringSlice("datasource"),
 		cCtx.StringSlice("data"),
-		cCtx.String("engine"),
 	); err != nil {
 		if err := cli.ShowAppHelp(cCtx); err != nil {
 			return fmt.Errorf("show app help: %s", err)
@@ -103,8 +102,10 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("validate flags: %s", err)
 	}
 
-	if err := a.setEngine(cCtx.String("engine")); err != nil {
-		return fmt.Errorf("set engine: %s", err)
+	if eng, ok := enginesMap[cCtx.String("engine")]; !ok {
+		a.engine = enginesMap["gotemplate"]
+	} else {
+		a.engine = eng
 	}
 
 	datasourceUrls, err := a.parseDatasourceUrls(cCtx.StringSlice("datasource"))

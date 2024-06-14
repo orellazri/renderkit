@@ -40,7 +40,7 @@ Run the `renderkit` command with the following arguments as either command-line 
 | `output`               | The output directory to write to                                               | string |
 | `datasource`           | The datasource to use for rendering (scheme://path)                            | list   |
 | `data`                 | The data to use for rendering. Can be used to provide data directly            | list   |
-| `engine`               | The templating engine to use for rendering                                     | string |
+| `engine`               | The templating engine to use for rendering (Go Templates by default)           | string |
 | `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
 
 ```bash

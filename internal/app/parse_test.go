@@ -58,19 +58,6 @@ func TestParseDatasourceUrls(t *testing.T) {
 	require.Equal(t, expectedUrls, urls)
 }
 
-func TestSetEngine(t *testing.T) {
-	app := &App{}
-
-	for engName, engInterface := range enginesMap {
-		err := app.setEngine(engName)
-		require.NoError(t, err)
-		require.Equal(t, engInterface, app.engine)
-	}
-
-	err := app.setEngine("unsupportedEngine")
-	require.Error(t, err)
-}
-
 func TestLoadDatasources(t *testing.T) {
 	tmpDir := t.TempDir()
 	ds1File, err := os.Create(filepath.Join(tmpDir, "ds1.yaml"))

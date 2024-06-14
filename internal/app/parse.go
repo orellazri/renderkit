@@ -94,16 +94,6 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, err
 	}
 }
 
-func (a *App) setEngine(engineStr string) error {
-	e, ok := enginesMap[engineStr]
-	if !ok {
-		return fmt.Errorf("unsupported engine: %s", engineStr)
-	}
-	a.engine = e
-
-	return nil
-}
-
 func (a *App) compileGlob(pattern string) ([]string, error) {
 	if err := fileglob.ValidPattern(pattern); err != nil {
 		return nil, fmt.Errorf("invalid glob pattern: %q", err)
