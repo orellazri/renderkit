@@ -35,7 +35,7 @@ func NewApp() *App {
 			Aliases: []string{"i"},
 			Usage:   "The input glob to render",
 		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
+		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:        "exclude",
 			Aliases:     []string{"x"},
 			Usage:       "The glob pattern for files to exclude from rendering",
@@ -123,12 +123,12 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("compile input glob: %s", err)
 	}
 
-	if len(cCtx.String("exclude")) > 0 {
-		excludeFiles, err := a.compileGlob(cCtx.String("exclude"))
+	if len(cCtx.StringSlice("exclude")) > 0 {
+		aggregatedExcludeFiles, err := a.aggregateExcludeFiles(cCtx.StringSlice("exclude"))
 		if err != nil {
-			return fmt.Errorf("compile exclude glob: %s", err)
+			return fmt.Errorf("aggregate exclude files: %s", err)
 		}
-		inputFiles = a.excludeFilesFromInput(inputFiles, excludeFiles)
+		inputFiles = a.excludeFilesFromInput(inputFiles, aggregatedExcludeFiles)
 	}
 
 	if err := a.render(

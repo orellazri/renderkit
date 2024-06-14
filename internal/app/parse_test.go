@@ -129,21 +129,21 @@ func TestFilteredInputFiles(t *testing.T) {
 	app := &App{}
 
 	tmpDir := t.TempDir()
-	for _, file := range []string{"1.txt", "2.txt", "3.txt"} {
+	for _, file := range []string{"1.txt", "2.txt", "3.txt", "4.txt"} {
 		_, err := os.Create(filepath.Join(tmpDir, file))
 		require.NoError(t, err)
 	}
 
-	inputGlob := "*.txt"
-	excludeGlob := "[1-2].txt"
+	excludeFilesGlobs := []string{filepath.Join(tmpDir, "[1-2].txt"), filepath.Join(tmpDir, "3*.txt")}
 
-	inputFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, inputGlob))
+	aggregatedExcludeFiles, err := app.aggregateExcludeFiles(excludeFilesGlobs)
 	require.NoError(t, err)
-	excludeFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, excludeGlob))
-	require.NoError(t, err)
-	inputFiles = app.excludeFilesFromInput(inputFiles, excludeFiles)
 
-	require.Equal(t, []string{filepath.Join(tmpDir, "3.txt")}, inputFiles)
+	inputFiles, err := app.compileGlob(fmt.Sprintf("%s/%s", tmpDir, "*.txt"))
+	require.NoError(t, err)
+	inputFiles = app.excludeFilesFromInput(inputFiles, aggregatedExcludeFiles)
+
+	require.Equal(t, []string{filepath.Join(tmpDir, "4.txt")}, inputFiles)
 }
 
 func TestExcludeFilesFromInput(t *testing.T) {

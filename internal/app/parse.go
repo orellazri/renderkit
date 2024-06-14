@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/goreleaser/fileglob"
@@ -119,4 +120,18 @@ func (a *App) excludeFilesFromInput(inputFiles []string, excludeFiles []string) 
 		}
 	}
 	return filtered
+}
+
+func (a *App) aggregateExcludeFiles(excludeFiles []string) ([]string, error) {
+	var aggregatedExcludeFiles []string
+	for _, excludeGlob := range excludeFiles {
+		excludeFiles, err := a.compileGlob(excludeGlob)
+		if err != nil {
+			return nil, fmt.Errorf("compile exclude glob %q: %s", excludeGlob, err)
+		}
+		aggregatedExcludeFiles = slices.Concat(aggregatedExcludeFiles, excludeFiles)
+	}
+	slices.Sort(aggregatedExcludeFiles)
+	aggregatedExcludeFiles = slices.Compact(aggregatedExcludeFiles)
+	return aggregatedExcludeFiles, nil
 }
