@@ -127,7 +127,7 @@ func (a *App) aggregateExcludeFiles(excludeFiles []string) ([]string, error) {
 	for _, excludeGlob := range excludeFiles {
 		excludeFiles, err := a.compileGlob(excludeGlob)
 		if err != nil {
-			return nil, fmt.Errorf("compile exclude glob: %s", err)
+			return nil, fmt.Errorf("compile exclude glob %q: %s", excludeGlob, err)
 		}
 		aggregatedExcludeFiles = slices.Concat(aggregatedExcludeFiles, excludeFiles)
 	}
