@@ -13,7 +13,7 @@
 
 ### Supported Engines
 
-- Go Templates (with [Sprig Functions](http://masterminds.github.io/sprig/))
+- Go Templates (including [Sprig Functions](http://masterminds.github.io/sprig/))
 - Jinja
 - Handlebars
 - Mustache
