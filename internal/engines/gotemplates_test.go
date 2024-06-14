@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGoTemplatesRender(t *testing.T) {
+func TestGoTemplatesRenderFile(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -18,7 +18,7 @@ func TestGoTemplatesRender(t *testing.T) {
 
 	engine := &GoTemplatesEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
+	err = engine.RenderFile(file.Name(), writer, map[string]any{
 		"Name": "John",
 		"Age":  20,
 	})
@@ -26,7 +26,7 @@ func TestGoTemplatesRender(t *testing.T) {
 	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }
 
-func TestGoTemplatesRenderAdvanced(t *testing.T) {
+func TestGoTemplatesRenderFileAdvanced(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -37,7 +37,7 @@ func TestGoTemplatesRenderAdvanced(t *testing.T) {
 
 	engine := &GoTemplatesEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
+	err = engine.RenderFile(file.Name(), writer, map[string]any{
 		"names": []string{"John", "Doe"},
 	})
 
@@ -46,7 +46,7 @@ func TestGoTemplatesRenderAdvanced(t *testing.T) {
 Hi John<br>Hi Doe<br>`, writer.String())
 }
 
-func TestGoTemplatesRenderWithSprigFunctions(t *testing.T) {
+func TestGoTemplatesRenderFileWithSprigFunctions(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -57,11 +57,24 @@ func TestGoTemplatesRenderWithSprigFunctions(t *testing.T) {
 
 	engine := &GoTemplatesEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
+	err = engine.RenderFile(file.Name(), writer, map[string]any{
 		"names": []string{"John", "Doe"},
 	})
 
 	require.NoError(t, err)
 	require.Equal(t, `
 HELLO!HELLO!HELLO!HELLO!HELLO!`, writer.String())
+}
+
+func TestGoTemplatesRenderReader(t *testing.T) {
+	engine := &GoTemplatesEngine{}
+	writer := &bytes.Buffer{}
+	err := engine.Render(bytes.NewBufferString("Hello, {{ .Name }}! You are {{ .Age }} years old."),
+		writer,
+		map[string]any{
+			"Name": "John",
+			"Age":  20,
+		})
+	require.NoError(t, err)
+	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }

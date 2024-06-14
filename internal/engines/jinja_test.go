@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestJinjaRender(t *testing.T) {
+func TestJinjaRenderFile(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -18,7 +18,7 @@ func TestJinjaRender(t *testing.T) {
 
 	engine := &JinjaEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
+	err = engine.RenderFile(file.Name(), writer, map[string]any{
 		"Name": "John",
 		"Age":  20,
 	})
@@ -26,7 +26,7 @@ func TestJinjaRender(t *testing.T) {
 	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }
 
-func TestJinjaRenderAdvanced(t *testing.T) {
+func TestJinjaRenderFileAdvanced(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestJinjaRenderAdvanced(t *testing.T) {
 
 	engine := &JinjaEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
+	err = engine.RenderFile(file.Name(), writer, map[string]any{
 		"version": "1.2.3",
 	})
 
@@ -50,4 +50,17 @@ func TestJinjaRenderAdvanced(t *testing.T) {
 
 
 Version is: 1.2.3`, writer.String())
+}
+
+func TestJinjaRenderReader(t *testing.T) {
+	engine := &JinjaEngine{}
+	writer := &bytes.Buffer{}
+	err := engine.Render(bytes.NewBufferString("Hello, {{ Name }}! You are {{ Age }} years old."),
+		writer,
+		map[string]any{
+			"Name": "John",
+			"Age":  20,
+		})
+	require.NoError(t, err)
+	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }

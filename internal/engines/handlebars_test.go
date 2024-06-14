@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHandlebarsRender(t *testing.T) {
+func TestHandlebarsRenderFile(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -18,7 +18,7 @@ func TestHandlebarsRender(t *testing.T) {
 
 	engine := &HandlebarsEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
+	err = engine.RenderFile(file.Name(), writer, map[string]any{
 		"Name": "John",
 		"Age":  20,
 	})
@@ -26,7 +26,7 @@ func TestHandlebarsRender(t *testing.T) {
 	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }
 
-func TestHandlebarsRenderAdvanced(t *testing.T) {
+func TestHandlebarsRenderFileAdvanced(t *testing.T) {
 	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "test.txt")
 	require.NoError(t, err)
@@ -37,11 +37,24 @@ func TestHandlebarsRenderAdvanced(t *testing.T) {
 
 	engine := &HandlebarsEngine{}
 	writer := &bytes.Buffer{}
-	err = engine.Render(file.Name(), writer, map[string]any{
+	err = engine.RenderFile(file.Name(), writer, map[string]any{
 		"names": []string{"John", "Doe"},
 	})
 
 	require.NoError(t, err)
 	require.Equal(t, `
 Hi John<br>Hi Doe<br>`, writer.String())
+}
+
+func TestHandlebarsRenderReader(t *testing.T) {
+	engine := &HandlebarsEngine{}
+	writer := &bytes.Buffer{}
+	err := engine.Render(bytes.NewBufferString("Hello, {{ Name }}! You are {{ Age }} years old."),
+		writer,
+		map[string]any{
+			"Name": "John",
+			"Age":  20,
+		})
+	require.NoError(t, err)
+	require.Equal(t, "Hello, John! You are 20 years old.", writer.String())
 }

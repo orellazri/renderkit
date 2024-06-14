@@ -1,7 +1,6 @@
 package engines
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/nikolalohinski/gonja/v2"
@@ -10,15 +9,34 @@ import (
 
 type JinjaEngine struct{}
 
-func (e *JinjaEngine) Render(file string, w io.Writer, data map[string]any) error {
-	template, err := gonja.FromFile(file)
+func (e *JinjaEngine) RenderFile(file string, w io.Writer, data map[string]any) error {
+	tpl, err := gonja.FromFile(file)
 	if err != nil {
-		return fmt.Errorf("parse file %q: %s", file, err)
+		return err
 	}
 
 	dataCtx := exec.NewContext(data)
-	if err := template.Execute(w, dataCtx); err != nil {
-		return fmt.Errorf("execute template: %s", err)
+	if err := tpl.Execute(w, dataCtx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (e *JinjaEngine) Render(r io.Reader, w io.Writer, data map[string]any) error {
+	contents, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
+	tpl, err := gonja.FromBytes(contents)
+	if err != nil {
+		return err
+	}
+
+	dataCtx := exec.NewContext(data)
+	if err := tpl.Execute(w, dataCtx); err != nil {
+		return err
 	}
 
 	return nil

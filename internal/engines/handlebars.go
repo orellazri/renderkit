@@ -1,7 +1,6 @@
 package engines
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/aymerick/raymond"
@@ -9,20 +8,44 @@ import (
 
 type HandlebarsEngine struct{}
 
-func (e *HandlebarsEngine) Render(file string, w io.Writer, data map[string]any) error {
+func (e *HandlebarsEngine) RenderFile(file string, w io.Writer, data map[string]any) error {
 	tpl, err := raymond.ParseFile(file)
 	if err != nil {
-		return fmt.Errorf("parse %q: %s", file, err)
+		return err
 	}
 
 	result, err := tpl.Exec(data)
 	if err != nil {
-		return fmt.Errorf("render %q: %s", file, err)
+		return err
 	}
 
 	_, err = io.WriteString(w, result)
 	if err != nil {
-		return fmt.Errorf("write %q: %s", file, err)
+		return err
+	}
+
+	return nil
+}
+
+func (e *HandlebarsEngine) Render(r io.Reader, w io.Writer, data map[string]any) error {
+	contents, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
+	tpl, err := raymond.Parse(string(contents))
+	if err != nil {
+		return err
+	}
+
+	result, err := tpl.Exec(data)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.WriteString(w, result)
+	if err != nil {
+		return err
 	}
 
 	return nil

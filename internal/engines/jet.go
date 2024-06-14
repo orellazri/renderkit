@@ -1,8 +1,8 @@
 package engines
 
 import (
-	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"reflect"
 
@@ -11,16 +11,16 @@ import (
 
 type JetEngine struct{}
 
-func (e *JetEngine) Render(file string, w io.Writer, data map[string]any) error {
+func (e *JetEngine) RenderFile(file string, w io.Writer, data map[string]any) error {
 	abs, err := filepath.Abs(file)
 	if err != nil {
-		return fmt.Errorf("get absolute path: %s", err)
+		return err
 	}
 
 	renderer := jet.NewSet(jet.NewOSFileSystemLoader("/"))
 	tpl, err := renderer.GetTemplate(abs)
 	if err != nil {
-		return fmt.Errorf("get template: %s", err)
+		return err
 	}
 
 	dataMap := jet.VarMap{}
@@ -29,7 +29,25 @@ func (e *JetEngine) Render(file string, w io.Writer, data map[string]any) error 
 	}
 
 	if err := tpl.Execute(w, dataMap, nil); err != nil {
-		return fmt.Errorf("execute template: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func (e *JetEngine) Render(r io.Reader, w io.Writer, data map[string]any) error {
+	f, err := os.CreateTemp("", "jet")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, r); err != nil {
+		return err
+	}
+
+	if err := e.RenderFile(f.Name(), w, data); err != nil {
+		return err
 	}
 
 	return nil

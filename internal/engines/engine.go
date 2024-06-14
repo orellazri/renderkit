@@ -3,5 +3,6 @@ package engines
 import "io"
 
 type Engine interface {
-	Render(file string, w io.Writer, data map[string]any) error
+	RenderFile(file string, w io.Writer, data map[string]any) error
+	Render(r io.Reader, w io.Writer, data map[string]any) error
 }

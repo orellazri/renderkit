@@ -28,7 +28,7 @@ func (a *App) renderFile(inFilename, outFilename string, data map[string]any) er
 	}
 	defer outFile.Close()
 
-	if err := a.engine.Render(inFilename, outFile, data); err != nil {
+	if err := a.engine.RenderFile(inFilename, outFile, data); err != nil {
 		return fmt.Errorf("render template: %s", err)
 	}
 
