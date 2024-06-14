@@ -94,6 +94,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		cCtx.String("input"),
 		cCtx.String("output"),
 		cCtx.StringSlice("datasource"),
+		cCtx.StringSlice("data"),
 		cCtx.String("engine"),
 	); err != nil {
 		if err := cli.ShowAppHelp(cCtx); err != nil {

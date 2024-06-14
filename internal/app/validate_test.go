@@ -12,21 +12,24 @@ func TestValidateFlagsNoErrors(t *testing.T) {
 		"input.txt",
 		"output/",
 		[]string{"ds.yaml"},
+		nil,
 		"gotemplates",
 	)
 	require.NoError(t, err)
 }
 
-func TestValidateFlagsNoDatasource(t *testing.T) {
+func TestValidateFlagsNoData(t *testing.T) {
 	app := NewApp()
+
 	err := app.validateFlags(
 		"input.txt",
 		"output/",
 		nil,
+		nil,
 		"gotemplates",
 	)
 	require.Error(t, err)
-	require.ErrorIs(t, err, ErrDatasourceRequired)
+	require.ErrorIs(t, err, ErrDataRequired)
 }
 
 func TestValidateFlagsNoEngine(t *testing.T) {
@@ -35,6 +38,7 @@ func TestValidateFlagsNoEngine(t *testing.T) {
 		"input.txt",
 		"output/",
 		[]string{"ds.yaml"},
+		nil,
 		"",
 	)
 	require.Error(t, err)
@@ -47,6 +51,7 @@ func TestValidateFlagsNoInput(t *testing.T) {
 		"",
 		"output/",
 		[]string{"ds.yaml"},
+		nil,
 		"gotemplates",
 	)
 	require.Error(t, err)
@@ -59,6 +64,7 @@ func TestValidateFlagsNoOutput(t *testing.T) {
 		"input.txt",
 		"",
 		[]string{"ds.yaml"},
+		nil,
 		"gotemplates",
 	)
 	require.Error(t, err)
