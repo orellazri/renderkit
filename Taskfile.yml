@@ -18,5 +18,5 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - go test ./... {{if .SHORT}}"-short"{{end}} -coverprofile cover.out -v
+      - go test ./... {{if .SHORT}}"-short"{{end}} -coverprofile cover.out
       - go tool cover -html cover.out -o cover.html
