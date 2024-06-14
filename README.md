@@ -67,7 +67,24 @@ allow-duplicate-keys: true
 - [pre-commit](https://pre-commit.com/)
 - [golangci-lint](https://github.com/golangci/golangci-lint)
 
+### Running locally
+
+1.  Fork and clone the repository
+1.  Install pre-commit hooks:
+
+    ```bash
+    pre-commit install
+    ```
+
+1.  Run with:
+
+    ```bash
+    go run cmd/renderkit/main.go
+    ```
+
+### Running tests
+
 ```bash
-pre-commit install
-go run cmd/renderkit/main.go
+task test             # Run all tests (including integration)
+task test SHORT=true  # Run only unit tests
 ```
