@@ -74,22 +74,26 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, extraData []string, all
 }
 
 func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, error) {
+	urlWithoutPrefix := strings.TrimPrefix(url.String(), fmt.Sprintf("%s://", url.Scheme))
+
 	switch url.Scheme {
 	case "":
-		switch filepath.Ext(url.Path) {
+		switch filepath.Ext(urlWithoutPrefix) {
 		case ".yaml", ".yml":
-			return datasources.NewYamlDatasource(url.Path), nil
+			return datasources.NewYamlDatasource(urlWithoutPrefix), nil
 		case ".json":
-			return datasources.NewJsonDatasource(url.Path), nil
+			return datasources.NewJsonDatasource(urlWithoutPrefix), nil
+		case ".env":
+			return datasources.NewEnvFileDatasource(urlWithoutPrefix), nil
 		default:
-			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(url.Path))
+			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(urlWithoutPrefix))
 		}
 	case "env":
-		path := ""
+		variable := ""
 		if url.Host != "" {
-			path = strings.TrimPrefix(url.String(), fmt.Sprintf("%s://", url.Scheme))
+			variable = urlWithoutPrefix
 		}
-		return datasources.NewEnvDatasource(path), nil
+		return datasources.NewEnvDatasource(variable), nil
 	default:
 		return nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
 	}
