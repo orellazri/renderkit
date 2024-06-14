@@ -109,7 +109,7 @@ func (a *App) run(cCtx *cli.Context) error {
 	}
 
 	if eng, ok := enginesMap[cCtx.String("engine")]; !ok {
-		a.engine = enginesMap["gotemplate"]
+		a.engine = enginesMap["gotemplates"]
 	} else {
 		a.engine = eng
 	}
