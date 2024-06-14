@@ -1,4 +1,5 @@
 version: "3"
+
 tasks:
   default:
     cmds:
@@ -17,5 +18,5 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - go test ./... -coverprofile cover.out
+      - go test ./... {{if .SHORT}}"-short"{{end}} -coverprofile cover.out -v
       - go tool cover -html cover.out -o cover.html
