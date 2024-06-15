@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -114,16 +115,35 @@ func TestRenderFile(t *testing.T) {
 }
 
 func TestRenderFromString(t *testing.T) {
-	tmpDir := t.TempDir()
 	app := &App{
 		engine: &engines.GoTemplatesEngine{},
 	}
 	input := "Hello, {{ .Name }}!"
-	outputFile := filepath.Join(tmpDir, "output")
-	err := app.renderString(input, outputFile, map[string]any{
+	buf := &bytes.Buffer{}
+	err := app.renderString(input, buf, map[string]any{
 		"Name": "John",
 	})
 	require.NoError(t, err)
+	require.Equal(t, "Hello, John!", buf.String())
+}
+
+func TestRenderFromStringToFile(t *testing.T) {
+	tmpDir := t.TempDir()
+	app := &App{
+		engine: &engines.GoTemplatesEngine{},
+	}
+	err := app.render(
+		"Hello, {{ .Name }}!",
+		"",
+		"",
+		tmpDir,
+		nil,
+		map[string]any{
+			"Name": "John",
+		},
+	)
+	require.NoError(t, err)
+	outputFile := filepath.Join(tmpDir, "renderkit_output")
 	content, err := os.ReadFile(outputFile)
 	require.NoError(t, err)
 	require.Equal(t, "Hello, John!", string(content))
