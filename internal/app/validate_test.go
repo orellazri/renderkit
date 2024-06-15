@@ -103,3 +103,17 @@ func TestValidateFlagsInputFileAndExcludeConflict(t *testing.T) {
 	require.Error(t, err)
 	require.ErrorIs(t, err, ErrInputFileAndExcludeConflict)
 }
+
+func TestValidateFlagsInputStringAndExcludeConflict(t *testing.T) {
+	app := NewApp()
+	err := app.validateFlags(
+		"input-string",
+		"",
+		"",
+		[]string{"ds.yaml"},
+		nil,
+		[]string{"exclude.txt"},
+	)
+	require.Error(t, err)
+	require.ErrorIs(t, err, ErrInputStringAndExcludeConflict)
+}
