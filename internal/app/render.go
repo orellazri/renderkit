@@ -65,6 +65,9 @@ func (a *App) renderDir(inputDirpath string, outputDirpath string, excluded []st
 		var output io.Writer = os.Stdout
 		var closer func()
 		if len(outputDirpath) > 0 {
+			if slices.Contains(excluded, filepath.Join(inputDirpath, relPath)) {
+				return nil
+			}
 			output, closer, err = createOutputFileWithDir(filepath.Join(outputDirpath, relPath))
 			if err != nil {
 				return err
