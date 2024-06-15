@@ -2,7 +2,6 @@ package app
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -19,26 +18,26 @@ func (a *App) render(
 	excluded []string,
 	data map[string]any,
 ) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	var output io.Writer = os.Stdout
+	var closer func()
 	var err error
 
 	if len(inputString) > 0 { // Render input string
 		if len(outputDir) > 0 {
-			output, err = createOutputFileWithDir(ctx, filepath.Join(outputDir, "renderkit_output"))
+			output, closer, err = createOutputFileWithDir(filepath.Join(outputDir, "renderkit_output"))
 			if err != nil {
 				return err
 			}
+			defer closer()
 		}
 		return a.renderString(inputString, output, data)
 	} else if len(inputFile) > 0 { // Render input file
 		if len(outputDir) > 0 {
-			output, err = createOutputFileWithDir(ctx, filepath.Join(outputDir, filepath.Base(inputFile)))
+			output, closer, err = createOutputFileWithDir(filepath.Join(outputDir, filepath.Base(inputFile)))
 			if err != nil {
 				return err
 			}
+			defer closer()
 		}
 		return a.renderFile(inputFile, output, excluded, data)
 	} else if len(inputDir) > 0 { // Render input directory
@@ -58,20 +57,19 @@ func (a *App) renderDir(inputDirpath string, outputDirpath string, excluded []st
 			return nil
 		}
 
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
 		relPath, err := filepath.Rel(inputDirpath, path)
 		if err != nil {
 			return fmt.Errorf("get relative path: %s", err)
 		}
 
 		var output io.Writer = os.Stdout
+		var closer func()
 		if len(outputDirpath) > 0 {
-			output, err = createOutputFileWithDir(ctx, filepath.Join(outputDirpath, relPath))
+			output, closer, err = createOutputFileWithDir(filepath.Join(outputDirpath, relPath))
 			if err != nil {
 				return err
 			}
+			defer closer()
 		}
 		if err := a.renderFile(path, output, excluded, data); err != nil {
 			return fmt.Errorf("render file %q: %s", path, err)
@@ -106,20 +104,16 @@ func (a *App) renderString(inputString string, output io.Writer, data map[string
 	return nil
 }
 
-func createOutputFileWithDir(ctx context.Context, outputFilepath string) (io.Writer, error) {
+func createOutputFileWithDir(outputFilepath string) (io.Writer, func(), error) {
 	outputDirpath := filepath.Dir(outputFilepath)
 	if err := os.MkdirAll(outputDirpath, os.ModePerm); err != nil {
-		return nil, fmt.Errorf("create output directory %s: %s", outputDirpath, err)
+		return nil, nil, fmt.Errorf("create output directory %s: %s", outputDirpath, err)
 	}
 
 	outputFile, err := os.Create(outputFilepath)
 	if err != nil {
-		return nil, fmt.Errorf("create output file %s: %s", outputFilepath, err)
+		return nil, nil, fmt.Errorf("create output file %s: %s", outputFilepath, err)
 	}
-	go func(ctx context.Context) {
-		<-ctx.Done()
-		outputFile.Close()
-	}(ctx)
 
-	return outputFile, nil
+	return outputFile, func() { outputFile.Close() }, nil
 }
