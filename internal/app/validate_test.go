@@ -10,8 +10,8 @@ func TestValidateFlagsNoErrors(t *testing.T) {
 	app := NewApp()
 	err := app.validateFlags(
 		"",
+		"",
 		"input.txt",
-		"output/",
 		[]string{"ds.yaml"},
 		nil,
 	)
@@ -23,8 +23,8 @@ func TestValidateFlagsNoData(t *testing.T) {
 
 	err := app.validateFlags(
 		"",
+		"",
 		"input.txt",
-		"output/",
 		nil,
 		nil,
 	)
@@ -37,7 +37,7 @@ func TestValidateFlagsNoInput(t *testing.T) {
 	err := app.validateFlags(
 		"",
 		"",
-		"output/",
+		"",
 		[]string{"ds.yaml"},
 		nil,
 	)
@@ -48,9 +48,9 @@ func TestValidateFlagsNoInput(t *testing.T) {
 func TestValidateFlagsInputFileAndDirConflict(t *testing.T) {
 	app := NewApp()
 	err := app.validateFlags(
+		"",
 		"input/",
 		"input.txt",
-		"output/",
 		[]string{"ds.yaml"},
 		nil,
 	)
@@ -58,15 +58,28 @@ func TestValidateFlagsInputFileAndDirConflict(t *testing.T) {
 	require.ErrorIs(t, err, ErrInputFileAndDirConflict)
 }
 
-func TestValidateFlagsNoOutput(t *testing.T) {
+func TestValidateFlagsInputStringAndFileConflict(t *testing.T) {
 	app := NewApp()
 	err := app.validateFlags(
+		"input-string",
 		"",
-		"input.txt",
+		"input",
+		[]string{"ds.yaml"},
+		nil,
+	)
+	require.Error(t, err)
+	require.ErrorIs(t, err, ErrInputStringAndFileConflict)
+}
+
+func TestValidateFlagsInputStringAndDirConflict(t *testing.T) {
+	app := NewApp()
+	err := app.validateFlags(
+		"input-string",
+		"input/",
 		"",
 		[]string{"ds.yaml"},
 		nil,
 	)
 	require.Error(t, err)
-	require.ErrorIs(t, err, ErrNoOuput)
+	require.ErrorIs(t, err, ErrInputStringAndDirConflict)
 }

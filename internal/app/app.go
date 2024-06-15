@@ -1,7 +1,10 @@
 package app
 
 import (
+	"bufio"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/orellazri/renderkit/internal/engines"
@@ -95,10 +98,25 @@ func (a *App) Run(args []string) error {
 }
 
 func (a *App) run(cCtx *cli.Context) error {
+	// Read from stdin into an input string
+	var inputString string
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		var stdinBytes []byte
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			stdinBytes = append(stdinBytes, scanner.Bytes()...)
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatalf("Failed to read from stdin: %s", err)
+		}
+		inputString = string(stdinBytes)
+	}
+
 	if err := a.validateFlags(
+		inputString,
 		cCtx.String("input-dir"),
 		cCtx.String("file"),
-		cCtx.String("output"),
 		cCtx.StringSlice("datasource"),
 		cCtx.StringSlice("data"),
 	); err != nil {
@@ -134,6 +152,7 @@ func (a *App) run(cCtx *cli.Context) error {
 	}
 
 	if err := a.render(
+		inputString,
 		cCtx.String("input-dir"),
 		cCtx.String("file"),
 		cCtx.String("output"),

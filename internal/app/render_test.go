@@ -30,6 +30,7 @@ func TestRenderDir(t *testing.T) {
 		engine: &engines.GoTemplatesEngine{},
 	}
 	err = app.render(
+		"",
 		inputDir,
 		"",
 		outputDir,
@@ -96,6 +97,7 @@ func TestRenderFile(t *testing.T) {
 	}
 	err = app.render(
 		"",
+		"",
 		inputFile,
 		outputDir,
 		nil,
@@ -109,4 +111,20 @@ func TestRenderFile(t *testing.T) {
 	require.NoError(t, err)
 	expectedContent := fmt.Sprintf("Hello, %s!", "John")
 	require.Equal(t, expectedContent, string(content))
+}
+
+func TestRenderFromString(t *testing.T) {
+	tmpDir := t.TempDir()
+	app := &App{
+		engine: &engines.GoTemplatesEngine{},
+	}
+	input := "Hello, {{ .Name }}!"
+	outputFile := filepath.Join(tmpDir, "output")
+	err := app.renderString(input, outputFile, map[string]any{
+		"Name": "John",
+	})
+	require.NoError(t, err)
+	content, err := os.ReadFile(outputFile)
+	require.NoError(t, err)
+	require.Equal(t, "Hello, John!", string(content))
 }
