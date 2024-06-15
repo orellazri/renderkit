@@ -9,7 +9,7 @@ var (
 	ErrInputStringAndDirConflict  = errors.New("only one of input or input-dir can be set")
 	ErrInputStringAndFileConflict = errors.New("only one of input or file can be set")
 	ErrInputFileAndDirConflict    = errors.New("only one of input or file can be set")
-	ErrNoOuput                    = errors.New("output is required")
+	ErrNoOutput                   = errors.New("output is required")
 	ErrDataRequired               = errors.New("data is required through the datasource or data flags")
 )
 
