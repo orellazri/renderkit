@@ -39,14 +39,14 @@ func NewApp() *App {
 			Usage:   "Template string to render",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "input-file",
+			Aliases: []string{"f"},
+			Usage:   "Template input file to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "input-dir",
 			Aliases: []string{"d"},
 			Usage:   "Template input directory to render",
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "file",
-			Aliases: []string{"f"},
-			Usage:   "Template input file to render",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:        "exclude",
@@ -124,7 +124,7 @@ func (a *App) run(cCtx *cli.Context) error {
 	if err := a.validateFlags(
 		inputString,
 		cCtx.String("input-dir"),
-		cCtx.String("file"),
+		cCtx.String("input-file"),
 		cCtx.StringSlice("datasource"),
 		cCtx.StringSlice("data"),
 		cCtx.StringSlice("exclude"),
@@ -163,7 +163,7 @@ func (a *App) run(cCtx *cli.Context) error {
 	if err := a.render(
 		inputString,
 		cCtx.String("input-dir"),
-		cCtx.String("file"),
+		cCtx.String("input-file"),
 		cCtx.String("output"),
 		aggregatedExcludeFiles,
 		data,
