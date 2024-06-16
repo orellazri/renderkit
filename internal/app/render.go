@@ -39,7 +39,7 @@ func (a *App) render(
 			}
 			defer closer()
 		}
-		return a.renderFile(inputFile, output, excluded, data)
+		return a.renderFile(inputFile, output, data)
 	} else if len(inputDir) > 0 { // Render input directory
 		return a.renderDir(inputDir, outputDir, excluded, data)
 	}
@@ -65,13 +65,16 @@ func (a *App) renderDir(inputDirpath string, outputDirpath string, excluded []st
 		var output io.Writer = os.Stdout
 		var closer func()
 		if len(outputDirpath) > 0 {
+			if slices.Contains(excluded, filepath.Join(inputDirpath, relPath)) {
+				return nil
+			}
 			output, closer, err = createOutputFileWithDir(filepath.Join(outputDirpath, relPath))
 			if err != nil {
 				return err
 			}
 			defer closer()
 		}
-		if err := a.renderFile(path, output, excluded, data); err != nil {
+		if err := a.renderFile(path, output, data); err != nil {
 			return fmt.Errorf("render file %q: %s", path, err)
 		}
 
@@ -84,11 +87,7 @@ func (a *App) renderDir(inputDirpath string, outputDirpath string, excluded []st
 	return nil
 }
 
-func (a *App) renderFile(inputFilepath string, output io.Writer, excluded []string, data map[string]any) error {
-	if slices.Contains(excluded, inputFilepath) {
-		return nil
-	}
-
+func (a *App) renderFile(inputFilepath string, output io.Writer, data map[string]any) error {
 	if err := a.engine.RenderFile(inputFilepath, output, data); err != nil {
 		return fmt.Errorf("render template: %s", err)
 	}

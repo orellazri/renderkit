@@ -127,6 +127,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		cCtx.String("file"),
 		cCtx.StringSlice("datasource"),
 		cCtx.StringSlice("data"),
+		cCtx.StringSlice("exclude"),
 	); err != nil {
 		if err := cli.ShowAppHelp(cCtx); err != nil {
 			return fmt.Errorf("show app help: %s", err)
