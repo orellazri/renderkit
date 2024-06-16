@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -83,7 +84,7 @@ func TestIntegrationInputOutputSubdirsMirrored(t *testing.T) {
 		filepath.Join(inputSubdir2, "file2.txt"),
 	}
 
-	err = os.WriteFile(inputFiles[0], []byte("My name is {{ .Name }}"), os.ModePerm)
+	err = os.WriteFile(inputFiles[0], []byte("My name is {{ .Name }} and I am {{ .Age }} years old"), os.ModePerm)
 	require.NoError(t, err)
 	err = os.WriteFile(inputFiles[1], []byte("I am {{ .Age }} years old"), os.ModePerm)
 	require.NoError(t, err)
@@ -106,6 +107,7 @@ func TestIntegrationInputOutputSubdirsMirrored(t *testing.T) {
 	err = app.Run([]string{
 		"",
 		"--input-dir", inputDir,
+		"--exclude", fmt.Sprintf("%s/*2.txt", inputSubdir2),
 		"--output", outputDir,
 		"--datasource", datasource1File.Name(),
 		"--datasource", datasource2File.Name(),
@@ -116,10 +118,10 @@ func TestIntegrationInputOutputSubdirsMirrored(t *testing.T) {
 	outputFile1 := filepath.Join(outputDir, "subdir1", "file1.txt")
 	outputContent1, err := os.ReadFile(outputFile1)
 	require.NoError(t, err)
-	require.Equal(t, "My name is John", string(outputContent1))
+	require.Equal(t, "My name is John and I am 31.5 years old", string(outputContent1))
 
+	// Check that the excluded file is not present
 	outputFile2 := filepath.Join(outputDir, "subdir2", "file2.txt")
-	outputContent2, err := os.ReadFile(outputFile2)
-	require.NoError(t, err)
-	require.Equal(t, "I am 31.5 years old", string(outputContent2))
+	_, err = os.Stat(outputFile2)
+	require.ErrorIs(t, err, os.ErrNotExist)
 }
