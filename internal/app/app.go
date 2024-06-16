@@ -34,14 +34,19 @@ func NewApp() *App {
 			Usage:   "Load configuration from YAML file",
 		},
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "input-dir",
+			Name:    "input",
 			Aliases: []string{"i"},
-			Usage:   "Input directory to render",
+			Usage:   "Template string to render",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:    "input-dir",
+			Aliases: []string{"d"},
+			Usage:   "Template input directory to render",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:    "file",
 			Aliases: []string{"f"},
-			Usage:   "Input file to render",
+			Usage:   "Template input file to render",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:        "exclude",
@@ -56,7 +61,7 @@ func NewApp() *App {
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:    "datasource",
-			Aliases: []string{"d"},
+			Aliases: []string{"ds"},
 			Usage:   "Datasource to use for rendering (scheme://path)",
 		}),
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
@@ -98,8 +103,9 @@ func (a *App) Run(args []string) error {
 }
 
 func (a *App) run(cCtx *cli.Context) error {
-	// Read from stdin into an input string
 	var inputString string
+
+	// Read from stdin into an input string; and if empty, from input flag
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		var stdinBytes []byte
@@ -111,6 +117,8 @@ func (a *App) run(cCtx *cli.Context) error {
 			log.Fatalf("Failed to read from stdin: %s", err)
 		}
 		inputString = string(stdinBytes)
+	} else if len(cCtx.String("input")) > 0 {
+		inputString = cCtx.String("input")
 	}
 
 	if err := a.validateFlags(
