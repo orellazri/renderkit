@@ -13,6 +13,7 @@ import (
 )
 
 var enginesMap = map[string]engines.Engine{
+	"envsubst":    &engines.EnvsubstEngine{},
 	"gotemplates": &engines.GoTemplatesEngine{},
 	"jinja":       &engines.JinjaEngine{},
 	"handlebars":  &engines.HandlebarsEngine{},
