@@ -2,6 +2,9 @@
 
 **Render Kit** is a versatile and powerful command-line interface (CLI) tool designed for comprehensive template rendering. It supports multiple template engines and data sources, providing both flexibility and efficiency.
 
+[![CodeQL](https://github.com/orellazri/renderkit/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/orellazri/renderkit/actions/workflows/github-code-scanning/codeql)
+[![Test](https://github.com/orellazri/renderkit/actions/workflows/test.yml/badge.svg)](https://github.com/orellazri/renderkit/actions/workflows/test.yml)
+
 ## Features
 
 - 🛠️ Supports multiple template engines
