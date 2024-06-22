@@ -8,8 +8,7 @@ before:
     - go mod tidy
 
 builds:
-  - main: ./cmd/renderkit/main.go
-    env:
+  - env:
       - CGO_ENABLED=0
     goos:
       - linux

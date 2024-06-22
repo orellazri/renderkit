@@ -8,7 +8,7 @@ tasks:
   run:
     desc: Run the application with playground data
     cmds:
-      - go run cmd/renderkit/main.go --config playground/renderkit.yml
+      - go run . --config playground/renderkit.yml
 
   local-release:
     desc: Build release locally
