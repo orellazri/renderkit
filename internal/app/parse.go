@@ -97,6 +97,8 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, err
 			variable = urlWithoutPrefix
 		}
 		return datasources.NewEnvDatasource(variable), nil
+	case "http", "https":
+		return datasources.NewWebFileDatasource(url.String()), nil
 	default:
 		return nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
 	}

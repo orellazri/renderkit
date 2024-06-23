@@ -2,6 +2,7 @@ package datasources
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 )
 
@@ -21,10 +22,22 @@ func (ds *JsonDatasource) Load() (map[string]any, error) {
 	defer file.Close()
 
 	data := make(map[string]any)
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&data); err != nil {
+	data, err = DecodeJson(file, data)
+	if err != nil {
 		return nil, err
 	}
 
 	return data, nil
+}
+
+func DecodeJson(r io.Reader, data map[string]any) (map[string]any, error) {
+	decoder := json.NewDecoder(r)
+	if err := decoder.Decode(&data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func IsJson(content []byte) bool {
+	return json.Unmarshal(content, &json.RawMessage{}) == nil
 }

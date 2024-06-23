@@ -1,6 +1,7 @@
 package datasources
 
 import (
+	"io"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -22,10 +23,22 @@ func (ds *YamlDatasource) Load() (map[string]any, error) {
 	defer file.Close()
 
 	data := make(map[string]any)
-	decoder := yaml.NewDecoder(file)
-	if err := decoder.Decode(&data); err != nil {
+	data, err = DecodeYaml(file, data)
+	if err != nil {
 		return nil, err
 	}
 
 	return data, nil
+}
+
+func DecodeYaml(r io.Reader, data map[string]any) (map[string]any, error) {
+	decoder := yaml.NewDecoder(r)
+	if err := decoder.Decode(&data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func IsYaml(content []byte) bool {
+	return yaml.Unmarshal(content, &yaml.Node{}) == nil
 }
