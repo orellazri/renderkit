@@ -84,6 +84,8 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, err
 			return datasources.NewYamlDatasource(urlWithoutPrefix), nil
 		case ".json":
 			return datasources.NewJsonDatasource(urlWithoutPrefix), nil
+		case ".toml":
+			return datasources.NewTomlDatasource(urlWithoutPrefix), nil
 		case ".env":
 			return datasources.NewEnvFileDatasource(urlWithoutPrefix), nil
 		default:
