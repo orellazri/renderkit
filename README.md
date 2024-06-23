@@ -18,10 +18,10 @@
 
 - Envsubst
 - Go Templates (including [Sprig Functions](http://masterminds.github.io/sprig/))
-- Jinja
 - Handlebars
-- Mustache
 - Jet
+- Jinja
+- Mustache
 
 ### Supported Datasources
 
@@ -70,8 +70,37 @@ You need to run the `renderkit` command with the following arguments as either c
 | `engine`               | Templating engine to use for rendering (Go Templates by default)               | string |
 | `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
 
+Below are practical examples demonstrating the usage of `renderkit`:
 ```bash
-renderkit --input-dir in/ --output out/ --datasource data.yaml --data myKey=myValue --engine jinja
+
+# Using a specific env var as a datasource
+$ cat ds.yml
+FN: "Doe"
+$ echo 'Hello {{.FN}} {{.LN}}' | renderkit -ds env://LN -ds ds.yml
+Hello John Doe
+
+# Using a template string and envsubst engine
+$ export LN="Doe"
+$ echo 'Hello $FN $LN' | renderkit -i 'Hello $FN $LN' -e envsubst --data "FN=John"
+Hello John Doe
+
+# Using a template file with data from a JSON file
+$ cat data.json
+{
+  "names": {
+    "FN": "John",
+    "LN": "Doe"
+  }
+}
+$ cat file.tpl
+Hello {{ lower .names.FN }} {{ upper .names.LN }}
+$ renderkit -f file.tpl -ds data.json
+Hello john DOE
+
+# Render input directory [1.tpl, 2.tpl, 3.tpl] to output directory
+$ renderkit --input-dir in/ --output out/ --datasource data.yml --data myKey=myValue --engine jinja --exclude in/[1-2].tpl
+# Output directory will contain [3.tpl] rendered files
+
 ```
 
 ### Example YAML Configuration File
