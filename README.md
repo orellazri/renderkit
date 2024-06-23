@@ -63,7 +63,7 @@ You need to run the `renderkit` command with the following arguments as either c
 | `input`                | Template string to render                                                      | string |
 | `input-file`           | Template input file to render                                                  | string |
 | `input-dir`            | Template input directory to render                                             | string |
-| `exclude`              | Glob patterns for files to exclude from rendering                              | list   |
+| `exclude`              | Exclude files/directories using path-based glob patterns                       | list   |
 | `output`               | Output directory to write to                                                   | string |
 | `datasource`           | Datasource to use for rendering (scheme://path)                                | list   |
 | `data`                 | Data to use for rendering. Can be used to provide data directly                | list   |
