@@ -72,6 +72,7 @@ You need to run the `renderkit` command with the following arguments as either c
 
 ### **Notes on `datasource`
 
+- Inputs not utilizing a URL scheme (`<scheme>://`, etc.) will be interpreted as plain files. Refer to [Supported Datasources](#supported-datasources) for available formats.
 - For now, only the `env` scheme is supported for datasources.
 - Using just `env://` will load all your environment variables as keys you can use in your templates.
 - Using `env://<env_var>` will load only that specific environment variable.
