@@ -65,10 +65,17 @@ You need to run the `renderkit` command with the following arguments as either c
 | `input-dir`            | Template input directory to render                                             | string |
 | `exclude`              | Exclude files/directories using path-based glob patterns                       | list   |
 | `output`               | Output directory to write to                                                   | string |
-| `datasource`           | Datasource to use for rendering (scheme://path)                                | list   |
+| `datasource`           | Datasource to use for rendering (scheme://path) __**__                         | list   |
 | `data`                 | Data to use for rendering. Can be used to provide data directly                | list   |
 | `engine`               | Templating engine to use for rendering (Go Templates by default)               | string |
 | `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
+
+### **Notes on `datasource`
+
+- For now, only the `env` scheme is supported for datasources.
+- Using just `env://` will load all your environment variables as keys you can use in your templates.
+- Using `env://<env_var>` will load only that specific environment variable.
+- Specifying a path like `path/to/myvars.env` will load the variables from an `.env` file (the file must have a `.env` suffix).
 
 Below are practical examples demonstrating the usage of `renderkit`:
 ```bash
