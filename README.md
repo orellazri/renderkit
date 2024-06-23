@@ -18,10 +18,10 @@
 
 - Envsubst
 - Go Templates (including [Sprig Functions](http://masterminds.github.io/sprig/))
-- Jinja
 - Handlebars
-- Mustache
 - Jet
+- Jinja
+- Mustache
 
 ### Supported Datasources
 
