@@ -11,17 +11,13 @@ import (
 type EnvsubstEngine struct{}
 
 func (e *EnvsubstEngine) RenderFile(file string, w io.Writer, data map[string]any) error {
-	buf, err := os.ReadFile(file)
+	f, err := os.Open(file)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	err = envsubstRender(w, buf, data)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return e.Render(f, w, data)
 }
 
 func (e *EnvsubstEngine) Render(r io.Reader, w io.Writer, data map[string]any) error {
@@ -30,21 +26,12 @@ func (e *EnvsubstEngine) Render(r io.Reader, w io.Writer, data map[string]any) e
 		return err
 	}
 
-	err = envsubstRender(w, buf, data)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func envsubstRender(w io.Writer, input []byte, data map[string]any) error {
 	// Set environment variables. This is necessary because envsubst does not allow directly passing data as environment variables.
 	for k, v := range data {
 		os.Setenv(k, fmt.Sprintf("%v", v))
 	}
 
-	tpl, err := envsubst.Bytes(input)
+	tpl, err := envsubst.Bytes(buf)
 	if err != nil {
 		return err
 	}
