@@ -47,10 +47,11 @@ func TestCreateInvalidDatasourceFromURL(t *testing.T) {
 
 func TestParseDatasourceUrls(t *testing.T) {
 	a := &App{}
-	datasources := []string{"/tmp/ds.yaml", "/tmp/ds.json"}
+	datasources := []string{"/tmp/ds.yaml", "/tmp/ds.json", "/tmp/ds.toml"}
 	expectedUrls := []*url.URL{
 		{Path: "/tmp/ds.yaml"},
 		{Path: "/tmp/ds.json"},
+		{Path: "/tmp/ds.toml"},
 	}
 
 	urls, err := a.parseDatasourceUrls(datasources)
@@ -64,22 +65,28 @@ func TestLoadDatasources(t *testing.T) {
 	require.NoError(t, err)
 	ds2File, err := os.Create(filepath.Join(tmpDir, "ds2.json"))
 	require.NoError(t, err)
+	ds3File, err := os.Create(filepath.Join(tmpDir, "ds3.toml"))
+	require.NoError(t, err)
 
 	_, err = ds1File.WriteString("key1: value1")
 	require.NoError(t, err)
 	_, err = ds2File.WriteString(`{"key2": "value2"}`)
 	require.NoError(t, err)
-	extraData := []string{"key3=value3"}
+	_, err = ds3File.WriteString(`key3 = "value3"`)
+	require.NoError(t, err)
+	extraData := []string{"key4=value4"}
 
 	a := &App{}
 	datasourceUrls := []*url.URL{
 		{Path: ds1File.Name()},
 		{Path: ds2File.Name()},
+		{Path: ds3File.Name()},
 	}
 	expectedData := map[string]any{
 		"key1": "value1",
 		"key2": "value2",
 		"key3": "value3",
+		"key4": "value4",
 	}
 	data, err := a.loadDatasources(datasourceUrls, extraData, false)
 	require.NoError(t, err)
