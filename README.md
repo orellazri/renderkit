@@ -98,7 +98,7 @@ $ renderkit -f file.tpl -ds data.json
 Hello john DOE
 
 # Render input directory [1.tpl, 2.tpl, 3.tpl] to output directory
-$ renderkit --input-dir in/ --output out/ --datasource data.yml --data myKey=myValue --engine jinja --exclude 'in/[1-2].tpl'
+$ renderkit --input-dir in/ --exclude 'in/[1-2].tpl' --output out/ --datasource data.yml --data myKey=myValue --engine jinja
 # Output directory will contain [3.tpl] rendered files
 
 ```
