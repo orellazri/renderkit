@@ -128,6 +128,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		cCtx.StringSlice("datasource"),
 		cCtx.StringSlice("data"),
 		cCtx.StringSlice("exclude"),
+		cCtx.String("engine"),
 	); err != nil {
 		if err := cli.ShowAppHelp(cCtx); err != nil {
 			return fmt.Errorf("show app help: %s", err)

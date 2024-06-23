@@ -30,11 +30,12 @@ func TestIntegrationAllEngines(t *testing.T) {
 
 	// Define the input syntax for each engine
 	inputSyntax := map[string]string{
+		"envsubst":    "Hello, my name is ${Name}. I am ${Age} years old.",
 		"gotemplates": `Hello, my name is {{ .Name }}. I am {{ .Age }} years old.`,
-		"jinja":       `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
 		"handlebars":  `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
-		"mustache":    `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
 		"jet":         `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
+		"jinja":       `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
+		"mustache":    `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
 	}
 	require.Equal(t, len(enginesMap), len(inputSyntax), "all engines must be tested")
 

@@ -16,6 +16,7 @@
 
 ### Supported Engines
 
+- Envsubst
 - Go Templates (including [Sprig Functions](http://masterminds.github.io/sprig/))
 - Jinja
 - Handlebars

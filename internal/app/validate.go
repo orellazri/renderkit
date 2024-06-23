@@ -22,6 +22,7 @@ func (a *App) validateFlags(
 	datasource []string,
 	data []string,
 	excluded []string,
+	engine string,
 ) error {
 	if len(inputString) == 0 && len(inputDir) == 0 && len(inputFile) == 0 {
 		return ErrNoInput
@@ -39,7 +40,7 @@ func (a *App) validateFlags(
 		return ErrInputFileAndDirConflict
 	}
 
-	if len(datasource) == 0 && len(data) == 0 {
+	if len(datasource) == 0 && len(data) == 0 && engine != "envsubst" {
 		return ErrDataRequired
 	}
 
