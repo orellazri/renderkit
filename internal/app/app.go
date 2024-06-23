@@ -51,7 +51,7 @@ func NewApp() *App {
 		altsrc.NewStringSliceFlag(&cli.StringSliceFlag{
 			Name:        "exclude",
 			Aliases:     []string{"x"},
-			Usage:       "Glob pattern for files to exclude from rendering",
+			Usage:       "Exclude files/directories using path-based glob patterns",
 			DefaultText: "",
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
