@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -81,13 +82,33 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, err
 	case "":
 		switch filepath.Ext(urlWithoutPrefix) {
 		case ".yaml", ".yml":
-			return datasources.NewYamlDatasource(urlWithoutPrefix), nil
+			f, err := os.Open(urlWithoutPrefix)
+			if err != nil {
+				return nil, err
+			}
+			// defer f.Close()
+			return datasources.NewYamlDatasource(f), nil
 		case ".json":
-			return datasources.NewJsonDatasource(urlWithoutPrefix), nil
+			f, err := os.Open(urlWithoutPrefix)
+			if err != nil {
+				return nil, err
+			}
+			// defer f.Close()
+			return datasources.NewJsonDatasource(f), nil
 		case ".toml":
-			return datasources.NewTomlDatasource(urlWithoutPrefix), nil
+			f, err := os.Open(urlWithoutPrefix)
+			if err != nil {
+				return nil, err
+			}
+			// defer f.Close()
+			return datasources.NewTomlDatasource(f), nil
 		case ".env":
-			return datasources.NewEnvFileDatasource(urlWithoutPrefix), nil
+			f, err := os.Open(urlWithoutPrefix)
+			if err != nil {
+				return nil, err
+			}
+			// defer f.Close()
+			return datasources.NewEnvFileDatasource(f), nil
 		default:
 			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(urlWithoutPrefix))
 		}

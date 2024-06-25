@@ -34,17 +34,20 @@ func (ds *WebFileDatasource) Load() (map[string]any, error) {
 	r := bytes.NewReader(b)
 
 	if mt == "application/json" {
-		data, err = DecodeJson(r, data)
+		ds := NewJsonDatasource(r)
+		data, err = ds.Load()
 		if err != nil {
 			return nil, err
 		}
 	} else if mt == "application/toml" {
-		data, err = DecodeToml(r, data)
+		ds := NewTomlDatasource(r)
+		data, err = ds.Load()
 		if err != nil {
 			return nil, err
 		}
 	} else if mt == "application/yaml" || mt == "text/yaml" || mt == "text/x-yaml" || mt == "application/x-yaml" {
-		data, err = DecodeYaml(r, data)
+		ds := NewYamlDatasource(r)
+		data, err = ds.Load()
 		if err != nil {
 			return nil, err
 		}

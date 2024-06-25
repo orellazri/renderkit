@@ -13,7 +13,10 @@ import (
 
 func TestCreateYamlDatasourceFromURL(t *testing.T) {
 	a := &App{}
-	url, err := url.Parse("/tmp/ds.yaml")
+	tmpDir := t.TempDir()
+	file, err := os.Create(filepath.Join(tmpDir, "ds.yaml"))
+	require.NoError(t, err)
+	url, err := url.Parse(file.Name())
 	require.NoError(t, err)
 	ds, err := a.createDatasourceFromURL(url)
 	require.NoError(t, err)
@@ -22,7 +25,10 @@ func TestCreateYamlDatasourceFromURL(t *testing.T) {
 
 func TestCreateJsonDatasourceFromURL(t *testing.T) {
 	a := &App{}
-	url, err := url.Parse("/tmp/ds.json")
+	tmpDir := t.TempDir()
+	file, err := os.Create(filepath.Join(tmpDir, "ds.json"))
+	require.NoError(t, err)
+	url, err := url.Parse(file.Name())
 	require.NoError(t, err)
 	ds, err := a.createDatasourceFromURL(url)
 	require.NoError(t, err)
