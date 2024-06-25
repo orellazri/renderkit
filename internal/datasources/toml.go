@@ -38,7 +38,3 @@ func DecodeToml(r io.Reader, data map[string]any) (map[string]any, error) {
 	}
 	return data, nil
 }
-
-func IsToml(content []byte) bool {
-	return toml.Unmarshal(content, &map[string]interface{}{}) == nil
-}

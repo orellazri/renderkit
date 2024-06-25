@@ -3,6 +3,7 @@ package datasources
 import (
 	"bytes"
 	"io"
+	"mime"
 	"net/http"
 )
 
@@ -23,26 +24,26 @@ func (ds *WebFileDatasource) Load() (map[string]any, error) {
 	}
 	defer res.Body.Close()
 
+	ct := res.Header.Get("Content-Type")
+	mt, _, _ := mime.ParseMediaType(ct)
+
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
-	// b = []byte(`name = "toml"`)
-	// b = []byte(`{"name": "json"}`)
-	// b = []byte(`name: yaml`)
 	r := bytes.NewReader(b)
 
-	if IsJson(b) {
+	if mt == "application/json" {
 		data, err = DecodeJson(r, data)
 		if err != nil {
 			return nil, err
 		}
-	} else if IsToml(b) {
+	} else if mt == "application/toml" {
 		data, err = DecodeToml(r, data)
 		if err != nil {
 			return nil, err
 		}
-	} else if IsYaml(b) {
+	} else if mt == "application/yaml" || mt == "text/yaml" || mt == "text/x-yaml" || mt == "application/x-yaml" {
 		data, err = DecodeYaml(r, data)
 		if err != nil {
 			return nil, err

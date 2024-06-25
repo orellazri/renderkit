@@ -38,7 +38,3 @@ func DecodeYaml(r io.Reader, data map[string]any) (map[string]any, error) {
 	}
 	return data, nil
 }
-
-func IsYaml(content []byte) bool {
-	return yaml.Unmarshal(content, &yaml.Node{}) == nil
-}

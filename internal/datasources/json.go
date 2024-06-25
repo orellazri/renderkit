@@ -37,7 +37,3 @@ func DecodeJson(r io.Reader, data map[string]any) (map[string]any, error) {
 	}
 	return data, nil
 }
-
-func IsJson(content []byte) bool {
-	return json.Unmarshal(content, &json.RawMessage{}) == nil
-}
