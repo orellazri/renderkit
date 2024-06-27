@@ -83,30 +83,18 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, *os
 
 	switch url.Scheme {
 	case "":
+		f, err := os.Open(urlWithoutPrefix)
+		if err != nil {
+			return nil, nil, err
+		}
 		switch filepath.Ext(urlWithoutPrefix) {
 		case ".yaml", ".yml":
-			f, err := os.Open(urlWithoutPrefix)
-			if err != nil {
-				return nil, nil, err
-			}
 			return datasources.NewYamlDatasource(f), f, nil
 		case ".json":
-			f, err := os.Open(urlWithoutPrefix)
-			if err != nil {
-				return nil, nil, err
-			}
 			return datasources.NewJsonDatasource(f), f, nil
 		case ".toml":
-			f, err := os.Open(urlWithoutPrefix)
-			if err != nil {
-				return nil, nil, err
-			}
 			return datasources.NewTomlDatasource(f), f, nil
 		case ".env":
-			f, err := os.Open(urlWithoutPrefix)
-			if err != nil {
-				return nil, nil, err
-			}
 			return datasources.NewEnvFileDatasource(f), f, nil
 		default:
 			return nil, nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(urlWithoutPrefix))
