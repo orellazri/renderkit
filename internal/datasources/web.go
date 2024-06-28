@@ -1,8 +1,7 @@
 package datasources
 
 import (
-	"bytes"
-	"io"
+	"fmt"
 	"mime"
 	"net/http"
 )
@@ -16,8 +15,6 @@ func NewWebFileDatasource(uri string) *WebFileDatasource {
 }
 
 func (ds *WebFileDatasource) Load() (map[string]any, error) {
-	data := make(map[string]any)
-
 	res, err := http.Get(ds.uri)
 	if err != nil {
 		return nil, err
@@ -27,30 +24,22 @@ func (ds *WebFileDatasource) Load() (map[string]any, error) {
 	ct := res.Header.Get("Content-Type")
 	mt, _, _ := mime.ParseMediaType(ct)
 
-	b, err := io.ReadAll(res.Body)
+	var targetDs Datasource
+
+	switch mt {
+	case "application/json":
+		targetDs = NewJsonDatasource(res.Body)
+	case "application/toml":
+		targetDs = NewTomlDatasource(res.Body)
+	case "application/yaml", "text/yaml", "text/x-yaml", "application/x-yaml":
+		targetDs = NewYamlDatasource(res.Body)
+	default:
+		return nil, fmt.Errorf("unsupported content type: %s", mt)
+	}
+
+	data, err := targetDs.Load()
 	if err != nil {
 		return nil, err
-	}
-	r := bytes.NewReader(b)
-
-	if mt == "application/json" {
-		ds := NewJsonDatasource(r)
-		data, err = ds.Load()
-		if err != nil {
-			return nil, err
-		}
-	} else if mt == "application/toml" {
-		ds := NewTomlDatasource(r)
-		data, err = ds.Load()
-		if err != nil {
-			return nil, err
-		}
-	} else if mt == "application/yaml" || mt == "text/yaml" || mt == "text/x-yaml" || mt == "application/x-yaml" {
-		ds := NewYamlDatasource(r)
-		data, err = ds.Load()
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return data, nil
