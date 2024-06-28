@@ -7,15 +7,15 @@ import (
 )
 
 type WebFileDatasource struct {
-	uri string
+	url string
 }
 
-func NewWebFileDatasource(uri string) *WebFileDatasource {
-	return &WebFileDatasource{uri}
+func NewWebFileDatasource(url string) *WebFileDatasource {
+	return &WebFileDatasource{url}
 }
 
 func (ds *WebFileDatasource) Load() (map[string]any, error) {
-	res, err := http.Get(ds.uri)
+	res, err := http.Get(ds.url)
 	if err != nil {
 		return nil, err
 	}
