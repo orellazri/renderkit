@@ -2,29 +2,22 @@ package datasources
 
 import (
 	"encoding/json"
-	"os"
+	"io"
 )
 
 type JsonDatasource struct {
-	filepath string
+	r io.Reader
 }
 
-func NewJsonDatasource(filepath string) *JsonDatasource {
-	return &JsonDatasource{filepath}
+func NewJsonDatasource(r io.Reader) *JsonDatasource {
+	return &JsonDatasource{r}
 }
 
 func (ds *JsonDatasource) Load() (map[string]any, error) {
-	file, err := os.Open(ds.filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
 	data := make(map[string]any)
-	decoder := json.NewDecoder(file)
+	decoder := json.NewDecoder(ds.r)
 	if err := decoder.Decode(&data); err != nil {
 		return nil, err
 	}
-
 	return data, nil
 }

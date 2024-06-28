@@ -13,18 +13,24 @@ import (
 
 func TestCreateYamlDatasourceFromURL(t *testing.T) {
 	a := &App{}
-	url, err := url.Parse("/tmp/ds.yaml")
+	tmpDir := t.TempDir()
+	file, err := os.Create(filepath.Join(tmpDir, "ds.yaml"))
 	require.NoError(t, err)
-	ds, err := a.createDatasourceFromURL(url)
+	url, err := url.Parse(file.Name())
+	require.NoError(t, err)
+	ds, _, err := a.createDatasourceFromURL(url)
 	require.NoError(t, err)
 	require.IsType(t, &datasources.YamlDatasource{}, ds)
 }
 
 func TestCreateJsonDatasourceFromURL(t *testing.T) {
 	a := &App{}
-	url, err := url.Parse("/tmp/ds.json")
+	tmpDir := t.TempDir()
+	file, err := os.Create(filepath.Join(tmpDir, "ds.json"))
 	require.NoError(t, err)
-	ds, err := a.createDatasourceFromURL(url)
+	url, err := url.Parse(file.Name())
+	require.NoError(t, err)
+	ds, _, err := a.createDatasourceFromURL(url)
 	require.NoError(t, err)
 	require.IsType(t, &datasources.JsonDatasource{}, ds)
 }
@@ -35,13 +41,13 @@ func TestCreateInvalidDatasourceFromURL(t *testing.T) {
 	// Invalid extension
 	url, err := url.Parse("/tmp/ds.nothing")
 	require.NoError(t, err)
-	_, err = a.createDatasourceFromURL(url)
+	_, _, err = a.createDatasourceFromURL(url)
 	require.Error(t, err)
 
 	// Invalid scheme
 	url, err = url.Parse("nothing:///tmp/ds.yaml")
 	require.NoError(t, err)
-	_, err = a.createDatasourceFromURL(url)
+	_, _, err = a.createDatasourceFromURL(url)
 	require.Error(t, err)
 }
 

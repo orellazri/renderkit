@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -48,9 +49,12 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, extraData []string, all
 	}
 
 	for _, url := range datasourceUrls {
-		ds, err := a.createDatasourceFromURL(url)
+		ds, f, err := a.createDatasourceFromURL(url)
 		if err != nil {
 			return nil, fmt.Errorf("create datasource %q: %s", url, err)
+		}
+		if f != nil {
+			defer f.Close()
 		}
 
 		dsData, err := ds.Load()
@@ -74,31 +78,37 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, extraData []string, all
 	return data, nil
 }
 
-func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, error) {
+func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, *os.File, error) {
 	urlWithoutPrefix := strings.TrimPrefix(url.String(), fmt.Sprintf("%s://", url.Scheme))
 
 	switch url.Scheme {
 	case "":
+		f, err := os.Open(urlWithoutPrefix)
+		if err != nil {
+			return nil, nil, err
+		}
 		switch filepath.Ext(urlWithoutPrefix) {
 		case ".yaml", ".yml":
-			return datasources.NewYamlDatasource(urlWithoutPrefix), nil
+			return datasources.NewYamlDatasource(f), f, nil
 		case ".json":
-			return datasources.NewJsonDatasource(urlWithoutPrefix), nil
+			return datasources.NewJsonDatasource(f), f, nil
 		case ".toml":
-			return datasources.NewTomlDatasource(urlWithoutPrefix), nil
+			return datasources.NewTomlDatasource(f), f, nil
 		case ".env":
-			return datasources.NewEnvFileDatasource(urlWithoutPrefix), nil
+			return datasources.NewEnvFileDatasource(f), f, nil
 		default:
-			return nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(urlWithoutPrefix))
+			return nil, nil, fmt.Errorf("unsupported file extension: %s", filepath.Ext(urlWithoutPrefix))
 		}
 	case "env":
 		variable := ""
 		if url.Host != "" {
 			variable = urlWithoutPrefix
 		}
-		return datasources.NewEnvDatasource(variable), nil
+		return datasources.NewEnvDatasource(variable), nil, nil
+	case "http", "https":
+		return datasources.NewWebFileDatasource(url.String()), nil, nil
 	default:
-		return nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
+		return nil, nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
 	}
 }
 

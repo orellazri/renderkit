@@ -2,31 +2,25 @@ package datasources
 
 import (
 	"fmt"
-	"os"
+	"io"
 
 	"github.com/hashicorp/go-envparse"
 )
 
 type EnvFileDatasource struct {
-	filepath string
+	r io.Reader
 }
 
-func NewEnvFileDatasource(filepath string) *EnvFileDatasource {
-	return &EnvFileDatasource{filepath}
+func NewEnvFileDatasource(r io.Reader) *EnvFileDatasource {
+	return &EnvFileDatasource{r}
 }
 
 func (ds *EnvFileDatasource) Load() (map[string]any, error) {
 	data := make(map[string]any)
 
-	f, err := os.Open(ds.filepath)
+	env, err := envparse.Parse(ds.r)
 	if err != nil {
-		return nil, fmt.Errorf("open file %s: %s", ds.filepath, err)
-	}
-	defer f.Close()
-
-	env, err := envparse.Parse(f)
-	if err != nil {
-		return nil, fmt.Errorf("parse environment variables from file %s: %s", ds.filepath, err)
+		return nil, fmt.Errorf("parse environment variables: %s", err)
 	}
 
 	for k, v := range env {
