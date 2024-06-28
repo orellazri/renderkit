@@ -29,6 +29,7 @@
 - YAML
 - JSON
 - TOML
+- HTTP/S URL (Supports content based on the Content-Type header matching the MIME types of supported file formats in this list)
 
 ## Usage
 
@@ -65,12 +66,12 @@ You need to run the `renderkit` command with the following arguments as either c
 | `input-dir`            | Template input directory to render                                             | string |
 | `exclude`              | Exclude files/directories using path-based glob patterns                       | list   |
 | `output`               | Output directory to write to                                                   | string |
-| `datasource`           | Datasource to use for rendering (scheme://path) __**__                         | list   |
+| `datasource`           | Datasource to use for rendering (scheme://path) **\*\***                       | list   |
 | `data`                 | Data to use for rendering. Can be used to provide data directly                | list   |
 | `engine`               | Templating engine to use for rendering (Go Templates by default)               | string |
 | `allow-duplicate-keys` | Allow duplicate keys in datasources. If set, the last value found will be used | bool   |
 
-### **Notes on `datasource`
+### \*\*Notes on `datasource`
 
 - Inputs not utilizing a URL scheme (`<scheme>://`, etc.) will be interpreted as plain files. Refer to [Supported Datasources](#supported-datasources) for available formats.
 - For now, only the `env` scheme is supported for datasources.
@@ -79,6 +80,7 @@ You need to run the `renderkit` command with the following arguments as either c
 - Specifying a path like `path/to/myvars.env` will load the variables from an `.env` file (the file must have a `.env` suffix).
 
 Below are practical examples demonstrating the usage of `renderkit`:
+
 ```bash
 
 # Using a specific env var as a datasource
