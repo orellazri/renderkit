@@ -153,12 +153,12 @@ func (a *App) run(cCtx *cli.Context) error {
 	}
 
 	aggregatedExcludeFiles := []string{}
+	excludeSingularGlobs := []string{}
 	if len(cCtx.StringSlice("exclude")) > 0 {
-		excludeResult, err := a.aggregateExcludeFiles(cCtx.StringSlice("exclude"))
+		aggregatedExcludeFiles, excludeSingularGlobs, err = a.aggregateExcludeFiles(cCtx.StringSlice("exclude"))
 		if err != nil {
 			return fmt.Errorf("aggregate exclude files: %s", err)
 		}
-		aggregatedExcludeFiles = excludeResult
 	}
 
 	if err := a.render(
@@ -167,6 +167,7 @@ func (a *App) run(cCtx *cli.Context) error {
 		cCtx.String("input-file"),
 		cCtx.String("output"),
 		aggregatedExcludeFiles,
+		excludeSingularGlobs,
 		data,
 	); err != nil {
 		return fmt.Errorf("render: %s", err)

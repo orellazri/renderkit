@@ -148,16 +148,22 @@ func (a *App) compileGlob(pattern string) ([]string, error) {
 	return matches, nil
 }
 
-func (a *App) aggregateExcludeFiles(excludeFiles []string) ([]string, error) {
+func (a *App) aggregateExcludeFiles(excludeFiles []string) ([]string, []string, error) {
 	var aggregatedExcludeFiles []string
+	var aggregatedExcludeSingularGlobs []string
 	for _, excludeGlob := range excludeFiles {
+		if !strings.Contains(excludeGlob, "/") { // verify the glob isn't a path
+			aggregatedExcludeSingularGlobs = append(aggregatedExcludeSingularGlobs, excludeGlob)
+			continue
+		}
 		excludeFiles, err := a.compileGlob(excludeGlob)
 		if err != nil {
-			return nil, fmt.Errorf("compile exclude glob %q: %s", excludeGlob, err)
+			return nil, nil, fmt.Errorf("compile exclude glob %q: %s", excludeGlob, err)
 		}
 		aggregatedExcludeFiles = slices.Concat(aggregatedExcludeFiles, excludeFiles)
 	}
 	slices.Sort(aggregatedExcludeFiles)
 	aggregatedExcludeFiles = slices.Compact(aggregatedExcludeFiles)
-	return aggregatedExcludeFiles, nil
+
+	return aggregatedExcludeFiles, aggregatedExcludeSingularGlobs, nil
 }

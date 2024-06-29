@@ -36,6 +36,7 @@ func TestRenderDir(t *testing.T) {
 		"",
 		outputDir,
 		nil,
+		nil,
 		map[string]any{
 			"Name": "John",
 		},
@@ -78,7 +79,7 @@ func TestRenderDirWithSubpaths(t *testing.T) {
 		engine: &engines.GoTemplatesEngine{},
 	}
 
-	err = app.renderDir(inputDir, outputDir, nil, nil)
+	err = app.renderDir(inputDir, outputDir, nil, nil, nil)
 	require.NoError(t, err)
 
 	_, err = os.Stat(filepath.Join(outputDir, "subdir1", "file1.txt"))
@@ -101,6 +102,7 @@ func TestRenderFile(t *testing.T) {
 		"",
 		inputFile,
 		outputDir,
+		nil,
 		nil,
 		map[string]any{
 			"Name": "John",
@@ -137,6 +139,7 @@ func TestRenderFromStringToFile(t *testing.T) {
 		"",
 		"",
 		tmpDir,
+		nil,
 		nil,
 		map[string]any{
 			"Name": "John",
