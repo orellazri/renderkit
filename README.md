@@ -64,7 +64,7 @@ You need to run the `renderkit` command with the following arguments as either c
 | `input`                | Template string to render                                                      | string |
 | `input-file`           | Template input file to render                                                  | string |
 | `input-dir`            | Template input directory to render                                             | string |
-| `exclude`              | Exclude files/directories using path-based glob patterns                       | list   |
+| `exclude`              | Exclude files/directories using path-based glob or file glob patterns          | list   |
 | `output`               | Output directory to write to                                                   | string |
 | `datasource`           | Datasource to use for rendering (scheme://path) **\*\***                       | list   |
 | `data`                 | Data to use for rendering. Can be used to provide data directly                | list   |
@@ -109,6 +109,10 @@ Hello john DOE
 
 # Render input directory [1.tpl, 2.tpl, 3.tpl] to output directory
 $ renderkit --input-dir in/ --exclude 'in/[1-2].tpl' --output out/ --datasource data.yml --data myKey=myValue --engine jinja
+# Output directory will contain [3.tpl] rendered files
+
+# Use the two supported exclude patterns (path-based Render input directory [1.tpl, 2.tpl, 3.tpl, 1.txt] to output directory
+$ renderkit --input-dir in/ --exclude 'in/[1-2].tpl' --exclude '*.txt' --datasource data.yml
 # Output directory will contain [3.tpl] rendered files
 
 ```
