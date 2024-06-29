@@ -29,8 +29,7 @@
 - YAML
 - JSON
 - TOML
-- HTTP/S URL
-  _**Note**: For web URLs, ensure the response's Content-Type matches the file format's MIME type. Environment variable file types are not supported yet._
+- HTTP/S URL (_For web URLs, ensure the response's Content-Type matches the file format's MIME type. Environment variable file types are not supported yet)_
 
 ## Usage
 
