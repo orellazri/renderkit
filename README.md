@@ -29,7 +29,8 @@
 - YAML
 - JSON
 - TOML
-- HTTP/S URL (Supports content based on the Content-Type header matching the MIME types of supported file formats in this list)
+- HTTP/S URL
+  _**Note**: For web URLs, ensure the response's Content-Type matches the file format's MIME type. Environment variable file types are not supported yet._
 
 ## Usage
 

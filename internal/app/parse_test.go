@@ -2,9 +2,12 @@ package app
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/orellazri/renderkit/internal/datasources"
@@ -45,6 +48,58 @@ func TestCreateTomlDatasourceFromURL(t *testing.T) {
 	ds, _, err := a.createDatasourceFromURL(url)
 	require.NoError(t, err)
 	require.IsType(t, &datasources.TomlDatasource{}, ds)
+}
+
+func TestWebFileLoad(t *testing.T) {
+	var err error
+	dsFiles := []string{"ds.json", "ds.toml", "ds.yaml"}
+	dsTypes := map[string]datasources.Datasource{
+		dsFiles[0]: &datasources.JsonDatasource{},
+		dsFiles[1]: &datasources.TomlDatasource{},
+		dsFiles[2]: &datasources.YamlDatasource{},
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/" + dsFiles[0]:
+			w.Header().Set("Content-Type", "application/json")
+			_, err = fmt.Fprint(w, `{"key1": "value1", "key2": "value2"}`)
+			require.NoError(t, err)
+		case "/" + dsFiles[1]:
+			w.Header().Set("Content-Type", "application/toml")
+			_, err = fmt.Fprint(w, "key1 = \"value1\"\n key2 = \"value2\"")
+			require.NoError(t, err)
+		case "/" + dsFiles[2]:
+			w.Header().Set("Content-Type", "application/yaml")
+			_, err = fmt.Fprint(w, "key1: value1\nkey2: value2")
+			require.NoError(t, err)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	a := &App{}
+
+	expectedData := map[string]any{
+		"key1": "value1",
+		"key2": "value2",
+	}
+
+	for _, dsFile := range dsFiles {
+		url, err := url.Parse(ts.URL + "/" + dsFile)
+		require.NoError(t, err)
+
+		ds, rc, err := a.createDatasourceFromURL(url)
+		defer rc.Close()
+		require.NoError(t, err)
+
+		require.Equal(t, reflect.TypeOf(ds), reflect.TypeOf(dsTypes[dsFile]))
+
+		data, err := ds.Load()
+		require.NoError(t, err)
+		require.Equal(t, data, expectedData)
+	}
 }
 
 func TestCreateInvalidDatasourceFromURL(t *testing.T) {
