@@ -2,6 +2,9 @@ package app
 
 import (
 	"fmt"
+	"io"
+	"mime"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -78,7 +81,7 @@ func (a *App) loadDatasources(datasourceUrls []*url.URL, extraData []string, all
 	return data, nil
 }
 
-func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, *os.File, error) {
+func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, io.ReadCloser, error) {
 	urlWithoutPrefix := strings.TrimPrefix(url.String(), fmt.Sprintf("%s://", url.Scheme))
 
 	switch url.Scheme {
@@ -106,7 +109,28 @@ func (a *App) createDatasourceFromURL(url *url.URL) (datasources.Datasource, *os
 		}
 		return datasources.NewEnvDatasource(variable), nil, nil
 	case "http", "https":
-		return datasources.NewWebFileDatasource(url.String()), nil, nil
+		res, err := http.Get(url.String())
+		if err != nil {
+			return nil, nil, err
+		}
+
+		ct := res.Header.Get("Content-Type")
+		mt, _, _ := mime.ParseMediaType(ct)
+
+		var targetDs datasources.Datasource
+
+		switch mt {
+		case "application/json":
+			targetDs = datasources.NewJsonDatasource(res.Body)
+		case "application/toml":
+			targetDs = datasources.NewTomlDatasource(res.Body)
+		case "application/yaml", "text/yaml", "text/x-yaml", "application/x-yaml":
+			targetDs = datasources.NewYamlDatasource(res.Body)
+		default:
+			return nil, nil, fmt.Errorf("unsupported content type: %s", mt)
+		}
+
+		return targetDs, res.Body, nil
 	default:
 		return nil, nil, fmt.Errorf("scheme not supported: %s", url.Scheme)
 	}
