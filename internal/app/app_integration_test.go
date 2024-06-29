@@ -84,15 +84,21 @@ func TestIntegrationInputOutputSubdirsMirrored(t *testing.T) {
 	inputSubdir2 := filepath.Join(inputDir, "subdir2")
 	err = os.Mkdir(inputSubdir2, os.ModePerm)
 	require.NoError(t, err)
+	inputSubdir3 := filepath.Join(inputDir, "subdir3")
+	err = os.Mkdir(inputSubdir3, os.ModePerm)
+	require.NoError(t, err)
 
 	inputFiles := []string{
 		filepath.Join(inputSubdir1, "file1.txt"),
 		filepath.Join(inputSubdir2, "file2.txt"),
+		filepath.Join(inputSubdir3, "file3.txt"),
 	}
 
 	err = os.WriteFile(inputFiles[0], []byte("My name is {{ .Name }} and I am {{ .Age }} years old"), os.ModePerm)
 	require.NoError(t, err)
-	err = os.WriteFile(inputFiles[1], []byte("I am {{ .Age }} years old"), os.ModePerm)
+	err = os.WriteFile(inputFiles[1], []byte("I am {{ .Age }} years old. This file will be excluded."), os.ModePerm)
+	require.NoError(t, err)
+	err = os.WriteFile(inputFiles[2], []byte("I am {{ .Age }} years old. This file will also be excluded."), os.ModePerm)
 	require.NoError(t, err)
 
 	// Create output directory
@@ -114,6 +120,7 @@ func TestIntegrationInputOutputSubdirsMirrored(t *testing.T) {
 		"",
 		"--input-dir", inputDir,
 		"--exclude", fmt.Sprintf("%s/*2.txt", inputSubdir2),
+		"--exclude", "*3.txt",
 		"--output", outputDir,
 		"--datasource", datasource1File.Name(),
 		"--datasource", datasource2File.Name(),
@@ -126,8 +133,11 @@ func TestIntegrationInputOutputSubdirsMirrored(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "My name is John and I am 31.5 years old", string(outputContent1))
 
-	// Check that the excluded file is not present
+	// Check that the excluded files aren't present
 	outputFile2 := filepath.Join(outputDir, "subdir2", "file2.txt")
 	_, err = os.Stat(outputFile2)
+	require.ErrorIs(t, err, os.ErrNotExist)
+	outputFile3 := filepath.Join(outputDir, "subdir3", "file3.txt")
+	_, err = os.Stat(outputFile3)
 	require.ErrorIs(t, err, os.ErrNotExist)
 }
