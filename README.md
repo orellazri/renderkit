@@ -29,8 +29,8 @@
 - YAML
 - JSON
 - TOML
-
-***Note**: Supported file formats can be loaded from both local files and web URLs. For web URLs, ensure the response's Content-Type matches the file format's MIME type. Environment variable file types are not supported yet.*
+- HTTP/S URL
+  _**Note**: For web URLs, ensure the response's Content-Type matches the file format's MIME type. Environment variable file types are not supported yet._
 
 ## Usage
 
