@@ -216,7 +216,7 @@ func TestAggregateExcludeFiles(t *testing.T) {
 
 	excludeFilesGlobs := []string{filepath.Join(tmpDir, "[1-2].txt"), filepath.Join(tmpDir, "3*.txt")}
 
-	aggregatedExcludeFiles, _, err := app.aggregateExcludeFiles(excludeFilesGlobs)
+	aggregatedExcludeFiles, _, err := app.aggregateExcludePatterns(excludeFilesGlobs)
 	require.NoError(t, err)
 
 	require.ElementsMatch(t, []string{

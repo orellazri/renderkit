@@ -148,22 +148,22 @@ func (a *App) compileGlob(pattern string) ([]string, error) {
 	return matches, nil
 }
 
-func (a *App) aggregateExcludeFiles(excludeFiles []string) ([]string, []string, error) {
-	var aggregatedExcludeFiles []string
-	var aggregatedExcludeSingularGlobs []string
-	for _, excludeGlob := range excludeFiles {
-		if !strings.Contains(excludeGlob, "/") { // verify the glob isn't a path
-			aggregatedExcludeSingularGlobs = append(aggregatedExcludeSingularGlobs, excludeGlob)
+func (a *App) aggregateExcludePatterns(excludePatterns []string) ([]string, []string, error) {
+	var excludePaths []string
+	var excludeFileGlobs []string
+	for _, pattern := range excludePatterns {
+		if !strings.Contains(pattern, "/") { // verify the glob isn't a path
+			excludeFileGlobs = append(excludeFileGlobs, pattern)
 			continue
 		}
-		excludeFiles, err := a.compileGlob(excludeGlob)
+		excludeFiles, err := a.compileGlob(pattern)
 		if err != nil {
-			return nil, nil, fmt.Errorf("compile exclude glob %q: %s", excludeGlob, err)
+			return nil, nil, fmt.Errorf("compile exclude glob %q: %s", pattern, err)
 		}
-		aggregatedExcludeFiles = slices.Concat(aggregatedExcludeFiles, excludeFiles)
+		excludePaths = slices.Concat(excludePaths, excludeFiles)
 	}
-	slices.Sort(aggregatedExcludeFiles)
-	aggregatedExcludeFiles = slices.Compact(aggregatedExcludeFiles)
+	slices.Sort(excludePaths)
+	excludePaths = slices.Compact(excludePaths)
 
-	return aggregatedExcludeFiles, aggregatedExcludeSingularGlobs, nil
+	return excludePaths, excludeFileGlobs, nil
 }

@@ -17,8 +17,8 @@ func (a *App) render(
 	inputDir string,
 	inputFile string,
 	outputDir string,
-	excludedPaths []string,
-	excludeSingularGlobs []string,
+	excludePaths []string,
+	excludeFileGlobs []string,
 	data map[string]any,
 ) error {
 	var output io.Writer = os.Stdout
@@ -45,13 +45,13 @@ func (a *App) render(
 		return a.renderFile(inputFile, output, data)
 	} else if len(inputDir) > 0 { // Render input directory
 		// if outputDir is empty
-		return a.renderDir(inputDir, outputDir, excludedPaths, excludeSingularGlobs, data)
+		return a.renderDir(inputDir, outputDir, excludePaths, excludeFileGlobs, data)
 	}
 
 	return errors.New("unsupported mode")
 }
 
-func (a *App) renderDir(inputDirpath string, outputDirpath string, excludedPaths, excludeSingularGlobs []string, data map[string]any) error {
+func (a *App) renderDir(inputDirpath string, outputDirpath string, excludePaths, excludeFileGlobs []string, data map[string]any) error {
 	err := filepath.WalkDir(inputDirpath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -68,11 +68,11 @@ func (a *App) renderDir(inputDirpath string, outputDirpath string, excludedPaths
 
 		var output io.Writer = os.Stdout
 		var closer func()
-		if slices.Contains(excludedPaths, filepath.Join(inputDirpath, relPath)) {
+		if slices.Contains(excludePaths, filepath.Join(inputDirpath, relPath)) {
 			return nil
 		} else {
-			for _, sg := range excludeSingularGlobs {
-				if glob.MustCompile(sg).Match(relPath) || glob.MustCompile(sg).Match(filepath.Base(relPath)) {
+			for _, fg := range excludeFileGlobs {
+				if glob.MustCompile(fg).Match(relPath) || glob.MustCompile(fg).Match(filepath.Base(relPath)) {
 					return nil
 				}
 			}

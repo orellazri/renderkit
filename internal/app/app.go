@@ -152,12 +152,12 @@ func (a *App) run(cCtx *cli.Context) error {
 		return fmt.Errorf("load datasources: %s", err)
 	}
 
-	aggregatedExcludeFiles := []string{}
-	excludeSingularGlobs := []string{}
+	excludePaths := []string{}
+	excludeFileGlobs := []string{}
 	if len(cCtx.StringSlice("exclude")) > 0 {
-		aggregatedExcludeFiles, excludeSingularGlobs, err = a.aggregateExcludeFiles(cCtx.StringSlice("exclude"))
+		excludePaths, excludeFileGlobs, err = a.aggregateExcludePatterns(cCtx.StringSlice("exclude"))
 		if err != nil {
-			return fmt.Errorf("aggregate exclude files: %s", err)
+			return fmt.Errorf("aggregate exclude patterns: %s", err)
 		}
 	}
 
@@ -166,8 +166,8 @@ func (a *App) run(cCtx *cli.Context) error {
 		cCtx.String("input-dir"),
 		cCtx.String("input-file"),
 		cCtx.String("output"),
-		aggregatedExcludeFiles,
-		excludeSingularGlobs,
+		excludePaths,
+		excludeFileGlobs,
 		data,
 	); err != nil {
 		return fmt.Errorf("render: %s", err)

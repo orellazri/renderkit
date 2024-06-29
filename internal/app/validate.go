@@ -21,7 +21,7 @@ func (a *App) validateFlags(
 	inputFile string,
 	datasource []string,
 	data []string,
-	excluded []string,
+	excludePatterns []string,
 	engine string,
 ) error {
 	if len(inputString) == 0 && len(inputDir) == 0 && len(inputFile) == 0 {
@@ -44,11 +44,11 @@ func (a *App) validateFlags(
 		return ErrDataRequired
 	}
 
-	if len(inputFile) > 0 && len(excluded) > 0 {
+	if len(inputFile) > 0 && len(excludePatterns) > 0 {
 		return ErrInputFileAndExcludeConflict
 	}
 
-	if len(inputString) > 0 && len(excluded) > 0 {
+	if len(inputString) > 0 && len(excludePatterns) > 0 {
 		return ErrInputStringAndExcludeConflict
 	}
 
