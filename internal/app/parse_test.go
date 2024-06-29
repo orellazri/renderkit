@@ -35,6 +35,18 @@ func TestCreateJsonDatasourceFromURL(t *testing.T) {
 	require.IsType(t, &datasources.JsonDatasource{}, ds)
 }
 
+func TestCreateTomlDatasourceFromURL(t *testing.T) {
+	a := &App{}
+	tmpDir := t.TempDir()
+	file, err := os.Create(filepath.Join(tmpDir, "ds.toml"))
+	require.NoError(t, err)
+	url, err := url.Parse(file.Name())
+	require.NoError(t, err)
+	ds, _, err := a.createDatasourceFromURL(url)
+	require.NoError(t, err)
+	require.IsType(t, &datasources.TomlDatasource{}, ds)
+}
+
 func TestCreateInvalidDatasourceFromURL(t *testing.T) {
 	a := &App{}
 

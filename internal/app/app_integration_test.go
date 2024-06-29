@@ -2,6 +2,8 @@ package app
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -23,10 +25,6 @@ func TestIntegrationAllEngines(t *testing.T) {
 	require.NoError(t, err)
 	_, err = datasource1File.WriteString("Name: John")
 	require.NoError(t, err)
-	datasource2File, err := os.Create(filepath.Join(datasourceDir, "ds2.json"))
-	require.NoError(t, err)
-	_, err = datasource2File.WriteString(`{"Age": 31.5}`)
-	require.NoError(t, err)
 
 	// Define the input syntax for each engine
 	inputSyntax := map[string]string{
@@ -38,6 +36,13 @@ func TestIntegrationAllEngines(t *testing.T) {
 		"mustache":    `Hello, my name is {{ Name }}. I am {{ Age }} years old.`,
 	}
 	require.Equal(t, len(enginesMap), len(inputSyntax), "all engines must be tested")
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, err = fmt.Fprint(w, `{"Age": 31.5}`)
+		require.NoError(t, err)
+	}))
+	defer ts.Close()
 
 	for engine, syntax := range inputSyntax {
 		inputDir := t.TempDir()
@@ -53,7 +58,7 @@ func TestIntegrationAllEngines(t *testing.T) {
 			"--input-dir", inputDir,
 			"--output", outputDir,
 			"--datasource", datasource1File.Name(),
-			"--datasource", datasource2File.Name(),
+			"--datasource", ts.URL,
 			"--engine", engine,
 		})
 		require.NoError(t, err)
