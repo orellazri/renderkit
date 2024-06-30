@@ -69,13 +69,14 @@ func (a *App) renderDir(inputDirpath string, outputDirpath string, excludePaths,
 		var closer func()
 		if slices.Contains(excludePaths, filepath.Join(inputDirpath, relPath)) {
 			return nil
-		} else {
-			for _, fg := range excludeFileGlobs {
-				if glob.MustCompile(fg).Match(relPath) || glob.MustCompile(fg).Match(filepath.Base(relPath)) {
-					return nil
-				}
+		}
+		for _, fg := range excludeFileGlobs {
+			cg, _ := glob.Compile(fg)
+			if cg.Match(relPath) || cg.Match(filepath.Base(relPath)) {
+				return nil
 			}
 		}
+
 		if len(outputDirpath) > 0 {
 			output, closer, err = createOutputFileWithDir(filepath.Join(outputDirpath, relPath))
 			if err != nil {
