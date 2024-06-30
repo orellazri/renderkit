@@ -44,7 +44,6 @@ func (a *App) render(
 		}
 		return a.renderFile(inputFile, output, data)
 	} else if len(inputDir) > 0 { // Render input directory
-		// if outputDir is empty
 		return a.renderDir(inputDir, outputDir, excludePaths, excludeFileGlobs, data)
 	}
 
