@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+
+	"github.com/gobwas/glob"
 )
 
 func (a *App) render(
@@ -15,7 +17,8 @@ func (a *App) render(
 	inputDir string,
 	inputFile string,
 	outputDir string,
-	excluded []string,
+	excludePaths []string,
+	excludeFileGlobs []string,
 	data map[string]any,
 ) error {
 	var output io.Writer = os.Stdout
@@ -41,13 +44,13 @@ func (a *App) render(
 		}
 		return a.renderFile(inputFile, output, data)
 	} else if len(inputDir) > 0 { // Render input directory
-		return a.renderDir(inputDir, outputDir, excluded, data)
+		return a.renderDir(inputDir, outputDir, excludePaths, excludeFileGlobs, data)
 	}
 
 	return errors.New("unsupported mode")
 }
 
-func (a *App) renderDir(inputDirpath string, outputDirpath string, excluded []string, data map[string]any) error {
+func (a *App) renderDir(inputDirpath string, outputDirpath string, excludePaths, excludeFileGlobs []string, data map[string]any) error {
 	err := filepath.WalkDir(inputDirpath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -64,10 +67,17 @@ func (a *App) renderDir(inputDirpath string, outputDirpath string, excluded []st
 
 		var output io.Writer = os.Stdout
 		var closer func()
-		if len(outputDirpath) > 0 {
-			if slices.Contains(excluded, filepath.Join(inputDirpath, relPath)) {
+		if slices.Contains(excludePaths, filepath.Join(inputDirpath, relPath)) {
+			return nil
+		}
+		for _, fg := range excludeFileGlobs {
+			cg, _ := glob.Compile(fg)
+			if cg.Match(relPath) || cg.Match(filepath.Base(relPath)) {
 				return nil
 			}
+		}
+
+		if len(outputDirpath) > 0 {
 			output, closer, err = createOutputFileWithDir(filepath.Join(outputDirpath, relPath))
 			if err != nil {
 				return err
