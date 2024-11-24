@@ -56,7 +56,7 @@ To use Render Kit, you have multiple options:
      go install github.com/orellazri/renderkit@latest
      ```
 
-    _Please note this method produces a binary that may no be versioned correctly._
+    _Please note that this method produces a binary that may not be versioned correctly._
 
 You need to run the `renderkit` command with the following arguments as either command-line flags, or as a YAML configuration file passed via `--config`.
 
