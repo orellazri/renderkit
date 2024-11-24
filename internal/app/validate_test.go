@@ -7,7 +7,7 @@ import (
 )
 
 func TestValidateFlagsNoErrors(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 	err := app.validateFlags(
 		"",
 		"",
@@ -21,7 +21,7 @@ func TestValidateFlagsNoErrors(t *testing.T) {
 }
 
 func TestValidateFlagsNoData(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 
 	err := app.validateFlags(
 		"",
@@ -37,7 +37,7 @@ func TestValidateFlagsNoData(t *testing.T) {
 }
 
 func TestValidateFlagsNoDataWithEnvsubstEngine(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 
 	err := app.validateFlags(
 		"",
@@ -52,7 +52,7 @@ func TestValidateFlagsNoDataWithEnvsubstEngine(t *testing.T) {
 }
 
 func TestValidateFlagsNoInput(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 	err := app.validateFlags(
 		"",
 		"",
@@ -67,7 +67,7 @@ func TestValidateFlagsNoInput(t *testing.T) {
 }
 
 func TestValidateFlagsInputFileAndDirConflict(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 	err := app.validateFlags(
 		"",
 		"input/",
@@ -82,7 +82,7 @@ func TestValidateFlagsInputFileAndDirConflict(t *testing.T) {
 }
 
 func TestValidateFlagsInputStringAndFileConflict(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 	err := app.validateFlags(
 		"input-string",
 		"",
@@ -97,7 +97,7 @@ func TestValidateFlagsInputStringAndFileConflict(t *testing.T) {
 }
 
 func TestValidateFlagsInputStringAndDirConflict(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 	err := app.validateFlags(
 		"input-string",
 		"input/",
@@ -112,7 +112,7 @@ func TestValidateFlagsInputStringAndDirConflict(t *testing.T) {
 }
 
 func TestValidateFlagsInputFileAndExcludeConflict(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 	err := app.validateFlags(
 		"",
 		"",
@@ -127,7 +127,7 @@ func TestValidateFlagsInputFileAndExcludeConflict(t *testing.T) {
 }
 
 func TestValidateFlagsInputStringAndExcludeConflict(t *testing.T) {
-	app := NewApp()
+	app := NewApp("test")
 	err := app.validateFlags(
 		"input-string",
 		"",

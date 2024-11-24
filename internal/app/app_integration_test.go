@@ -52,7 +52,7 @@ func TestIntegrationAllEngines(t *testing.T) {
 		require.NoError(t, err)
 
 		// Run the app for each engine
-		app := NewApp()
+		app := NewApp("test")
 		err = app.Run([]string{
 			"",
 			"--input-dir", inputDir,
@@ -115,7 +115,7 @@ func TestIntegrationInputOutputSubdirsMirrored(t *testing.T) {
 	_, err = datasource2File.WriteString(`{"Age": 31.5}`)
 	require.NoError(t, err)
 
-	app := NewApp()
+	app := NewApp("test")
 	err = app.Run([]string{
 		"",
 		"--input-dir", inputDir,

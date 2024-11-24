@@ -17,7 +17,7 @@ type App struct {
 	engine engines.Engine
 }
 
-func NewApp() *App {
+func NewApp(version string) *App {
 	a := App{}
 
 	// Create a list of engine names to display in the CLI help
@@ -87,11 +87,12 @@ func NewApp() *App {
 	}
 
 	app := &cli.App{
-		Name:   "renderkit",
-		Usage:  "A swiss army knife CLI tool for rendering templates",
-		Flags:  flags,
-		Before: altsrc.InitInputSourceWithContext(flags, altsrc.NewYamlSourceFromFlagFunc("config")),
-		Action: a.run,
+		Name:    "renderkit",
+		Usage:   "A swiss army knife CLI tool for rendering templates",
+		Flags:   flags,
+		Before:  altsrc.InitInputSourceWithContext(flags, altsrc.NewYamlSourceFromFlagFunc("config")),
+		Action:  a.run,
+		Version: version,
 	}
 
 	a.cliApp = app

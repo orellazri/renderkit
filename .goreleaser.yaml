@@ -13,6 +13,8 @@ builds:
     goos:
       - linux
       - darwin
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
 
 archives:
   - format: tar.gz
