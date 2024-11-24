@@ -35,19 +35,11 @@
 
 To use Render Kit, you have multiple options:
 
-1. **Download the latest release binary**:
+-  **Download the latest release binary**:
 
    - Visit the [releases page](https://github.com/orellazri/renderkit/releases) and download the latest binary for your operating system. It's recommended to move the binary to a directory in your `PATH` to make it easier to run such as `/usr/local/bin`.
 
-1. **Install via Go**:
-
-   - Ensure that you have Go installed on your machine.
-   - Run the following command:
-     ```bash
-     go install github.com/orellazri/renderkit@latest
-     ```
-
-1. **Run the Docker image**:
+-  **Run the Docker image**:
 
    - If you prefer using Docker, you can run the `reaperberri/renderkit` Docker image.
    - Make sure you have Docker installed on your machine.
@@ -55,6 +47,16 @@ To use Render Kit, you have multiple options:
      ```bash
      docker run --rm reaperberri/renderkit <args>
      ```
+
+-  **Install with go install**:
+
+   - Ensure that you have Go installed on your machine.
+   - Run the following command:
+     ```bash
+     go install github.com/orellazri/renderkit@latest
+     ```
+
+    _Please note this method produces a binary that may no be versioned correctly._
 
 You need to run the `renderkit` command with the following arguments as either command-line flags, or as a YAML configuration file passed via `--config`.
 
