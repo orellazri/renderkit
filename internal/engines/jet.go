@@ -40,7 +40,7 @@ func (e *JetEngine) Render(r io.Reader, w io.Writer, data map[string]any) error 
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if _, err := io.Copy(f, r); err != nil {
 		return err

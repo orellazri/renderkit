@@ -15,7 +15,7 @@ func (e *EnvsubstEngine) RenderFile(file string, w io.Writer, data map[string]an
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	return e.Render(f, w, data)
 }

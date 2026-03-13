@@ -124,5 +124,5 @@ func createOutputFileWithDir(outputFilepath string) (io.Writer, func(), error) {
 		return nil, nil, fmt.Errorf("create output file %s: %s", outputFilepath, err)
 	}
 
-	return outputFile, func() { outputFile.Close() }, nil
+	return outputFile, func() { _ = outputFile.Close() }, nil
 }

@@ -38,11 +38,11 @@ Contents:
 
 	childFile, err := os.CreateTemp(dir, "child.txt")
 	require.NoError(t, err)
-	_, err = childFile.WriteString(fmt.Sprintf(`
+	_, err = fmt.Fprintf(childFile, `
 {{ extends %q }}
 {{ block contents() }}
 File contents are here
-{{ end }}`, baseFile.Name()))
+{{ end }}`, baseFile.Name())
 	require.NoError(t, err)
 
 	engine := &JetEngine{}
